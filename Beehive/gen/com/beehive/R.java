@@ -179,8 +179,8 @@ containing a value of this type.
         public static final int common_signin_btn_light_text_disabled=0x7f040006;
         public static final int common_signin_btn_light_text_focused=0x7f040007;
         public static final int common_signin_btn_light_text_pressed=0x7f040005;
-        public static final int common_signin_btn_text_dark=0x7f04001a;
-        public static final int common_signin_btn_text_light=0x7f04001b;
+        public static final int common_signin_btn_text_dark=0x7f04001b;
+        public static final int common_signin_btn_text_light=0x7f04001c;
         public static final int fuchsia=0x7f04000c;
         public static final int gray=0x7f04000f;
         public static final int green=0x7f040016;
@@ -188,6 +188,7 @@ containing a value of this type.
         public static final int maroon=0x7f040012;
         public static final int navy=0x7f040018;
         public static final int olive=0x7f040010;
+        public static final int orange=0x7f04001a;
         public static final int purple=0x7f040011;
         public static final int red=0x7f04000d;
         public static final int silver=0x7f04000e;
@@ -230,20 +231,24 @@ containing a value of this type.
         public static final int common_signin_btn_text_normal_light=0x7f020015;
         public static final int common_signin_btn_text_pressed_dark=0x7f020016;
         public static final int common_signin_btn_text_pressed_light=0x7f020017;
-        public static final int ic_action_search=0x7f020018;
-        public static final int ic_launcher=0x7f020019;
-        public static final int ic_plusone_medium_off_client=0x7f02001a;
-        public static final int ic_plusone_small_off_client=0x7f02001b;
-        public static final int ic_plusone_standard_off_client=0x7f02001c;
-        public static final int ic_plusone_tall_off_client=0x7f02001d;
+        public static final int conference_icon=0x7f020018;
+        public static final int entrance_icon=0x7f020019;
+        public static final int ic_action_search=0x7f02001a;
+        public static final int ic_launcher=0x7f02001b;
+        public static final int ic_plusone_medium_off_client=0x7f02001c;
+        public static final int ic_plusone_small_off_client=0x7f02001d;
+        public static final int ic_plusone_standard_off_client=0x7f02001e;
+        public static final int ic_plusone_tall_off_client=0x7f02001f;
+        public static final int library_icon=0x7f020020;
+        public static final int location_background=0x7f020021;
+        public static final int meeting_icon=0x7f020022;
+        public static final int starbucks_icon=0x7f020023;
     }
     public static final class id {
-        public static final int action_search=0x7f050017;
-        public static final int action_settings=0x7f050018;
-        public static final int building_best_time=0x7f050016;
+        public static final int action_search=0x7f05001d;
+        public static final int action_settings=0x7f05001e;
         public static final int building_name=0x7f050014;
-        public static final int building_occupancy=0x7f050015;
-        public static final int building_pics=0x7f050013;
+        public static final int category=0x7f050013;
         public static final int chart=0x7f050008;
         public static final int footer=0x7f05000c;
         public static final int footer_contribution=0x7f050009;
@@ -251,10 +256,17 @@ containing a value of this type.
         public static final int hybrid=0x7f050004;
         public static final int icon=0x7f05000a;
         public static final int info_layout=0x7f050010;
+        public static final int location_layout=0x7f050015;
+        public static final int location_name=0x7f05001a;
+        public static final int location_pic1=0x7f050016;
+        public static final int location_pic2=0x7f050017;
+        public static final int location_pic3=0x7f050018;
+        public static final int location_pic4=0x7f050019;
         public static final int map=0x7f05000e;
         public static final int mapLayout=0x7f05000d;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
+        public static final int occupancy=0x7f05001b;
         public static final int option=0x7f05000b;
         public static final int pager=0x7f050005;
         public static final int pics=0x7f05000f;
@@ -262,6 +274,7 @@ containing a value of this type.
         public static final int separator=0x7f050007;
         public static final int subtitle=0x7f050012;
         public static final int terrain=0x7f050003;
+        public static final int time_to_go=0x7f05001c;
         public static final int title=0x7f050011;
     }
     public static final class integer {
@@ -273,7 +286,9 @@ containing a value of this type.
         public static final int fragment_list=0x7f030002;
         public static final int fragment_map=0x7f030003;
         public static final int locationslist_row=0x7f030004;
-        public static final int map_info_window=0x7f030005;
+        public static final int locationslist_row_category=0x7f030005;
+        public static final int map_infowindow_building=0x7f030006;
+        public static final int map_infowindow_location=0x7f030007;
     }
     public static final class menu {
         public static final int activity_main_actions=0x7f0a0000;
