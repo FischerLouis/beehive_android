@@ -1,9 +1,13 @@
 package com.beehive.activities;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import com.beehive.fragments.FragmentList;
 import com.beehive.fragments.FragmentMap;
+import com.beehive.tools.JSONDownloader;
 import com.beehive.R;
 
 import android.app.ActionBar;
@@ -17,8 +21,9 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends FragmentActivity implements
-ActionBar.TabListener {
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
+	
+	JSONDownloader jsonDownloader;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -39,6 +44,9 @@ ActionBar.TabListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		// Url zones
+		URL urlZones;
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -69,6 +77,14 @@ ActionBar.TabListener {
 			// the TabListener interface, as the callback (listener) for when
 			// this tab is selected.
 			actionBar.addTab(actionBar.newTab().setText(mSectionsPagerAdapter.getPageTitle(i)).setTabListener(this));
+		}
+		try {
+			urlZones = new URL("http://api.letsbeehive.tk/zones/listall");
+			jsonDownloader = new JSONDownloader(this);
+			jsonDownloader.execute(urlZones);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -124,13 +140,31 @@ ActionBar.TabListener {
 
 		@Override
 		public Fragment getItem(int position) {
+			String arrayZonesString = null;
+			try {
+				arrayZonesString = jsonDownloader.get();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Bundle args = new Bundle();
+	        args.putString("arrayZonesString",arrayZonesString);
 			switch (position) {
 			case 0:
-				// To watch fragment activity
-				return new FragmentMap();
+				// Map Fragment
+				FragmentMap fragmentMap = new FragmentMap();
+		        //put data to bundle
+		        fragmentMap.setArguments(args);
+				return fragmentMap;
 			case 1:
-				// To download fragment activity
-				return new FragmentList();
+				// Map Fragment
+				FragmentList fragmentList = new FragmentList();
+		        //put data to bundle
+				fragmentList.setArguments(args);
+				return fragmentList;
 			}
 
 			return null;

@@ -3,74 +3,68 @@ package com.beehive.fragments;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+import com.squareup.picasso.Picasso.LoadedFrom;
 import com.beehive.R;
 import com.beehive.activities.StatisticsActivity;
-import com.beehive.objects.Building;
-import com.beehive.objects.Location;
+import com.beehive.objects.AddInfoZone;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-public class FragmentMap extends Fragment implements OnInfoWindowClickListener, InfoWindowAdapter,  OnMapClickListener {
+public class FragmentMap extends Fragment implements OnInfoWindowClickListener, InfoWindowAdapter, OnCameraChangeListener {
 
 	private static View view;
 	// Google Map
 	private GoogleMap googleMap;
+	//Initialize the zoom value
+	private float previousZoomLevel = 14.5f;
+	private boolean isZooming = false;
 	//Data
-	private ArrayList<Building> buildings;
-	private ArrayList<String> buildingList;
-	private HashMap<String,ArrayList<MarkerOptions>> buildingMarkers;
-	private ArrayList<Marker> activeSubMarkers;
-	private Marker activeMarker;
+	private HashMap<String,AddInfoZone> addInfoZoneHm;
+	private HashMap<String,ArrayList<String>> zonesList;
+	private ArrayList<Marker> markersZoneList;
+	private ArrayList<Marker> markersSubZoneList;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		//Data Request
-		requestData();
 		//Map set up
 		initMap(inflater, container);
+		//Data Request And Set Up
+		try {
+			retrieveData();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//Marker building
 		setMarkers();
 		return view;
-	}
-
-	private void requestData(){
-		//Creation des objects Locations
-		Location loc1 = new Location(1, "Starbucks", "http://lala/", 33.774258, -84.396348, 0.80, "now");
-		Location loc2 = new Location(2, "Conference Room", "http://lala/", 33.774930, -84.396269, 0.20, "in 5mn");
-		Location loc3 = new Location(3, "Big Hall", "http://lala/", 33.774635, -84.396465, 0.65, "tommorow");
-		Location loc4 = new Location(4, "Meeting Room", "http://lala/", 33.775038, -84.396449, 0.10, "now");
-		ArrayList<Location> locations = new ArrayList<Location>();
-		locations.add(loc1);
-		locations.add(loc2);
-		locations.add(loc3);
-		locations.add(loc4);
-		//Creation des objects Buildings
-		Building building1 = new Building(1, "Clough", 33.774778, -84.396395, locations);
-		buildings = new ArrayList<Building>();
-		buildings.add(building1);
-		//Creation de la list buildings
-		buildingList = new ArrayList<String>();
-		buildingList.add(building1.getName());
 	}
 
 	private void initMap(LayoutInflater inflater, ViewGroup container){
@@ -87,60 +81,113 @@ public class FragmentMap extends Fragment implements OnInfoWindowClickListener, 
 			googleMap.setMyLocationEnabled(true);
 			//Default position and zoom (Georgia Tech)
 			final LatLng GeorgiaTech = new LatLng(33.775771, -84.396302);
-			googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(GeorgiaTech , 14.5f) );
-			//Default marker
-			for(int i=0;i<buildings.size();i++){
-				Building currentBuilding = buildings.get(i);
-				googleMap.addMarker(new MarkerOptions()
-				.position(new LatLng(currentBuilding.getLatitude(),currentBuilding.getLongitude()))
-				.title(currentBuilding.getName()))
-				.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-			}
+			googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(GeorgiaTech, previousZoomLevel) );
 		} catch (InflateException e) {
 			/* map is already there, just return view as it is */
 		}
 		googleMap.setInfoWindowAdapter(this);
 		googleMap.setOnInfoWindowClickListener(this);
-		googleMap.setOnMapClickListener(this);
+		googleMap.setOnCameraChangeListener(this);
 	}
 
-	private void setMarkers(){
-		//Creation Hashmap: Building=>markers
-		buildingMarkers = new HashMap<String,ArrayList<MarkerOptions>>();
-		ArrayList<MarkerOptions> arrayMarkers = new ArrayList<MarkerOptions>();
-		for(int i=0;i<buildings.get(0).getLocations().size();i++){
-			Location location = buildings.get(0).getLocations().get(i);
-			MarkerOptions markerOptions = new MarkerOptions()
-			.position(new LatLng(location.getLatitude(), location.getLongitude()))
-			.title(location.getName())
+	private void retrieveData() throws JSONException{
+		// Bulk Data Retrieve
+		Bundle bundle = getArguments();
+		String arrayZonesString = bundle.getString("arrayZonesString");
+		JSONArray arrayZonesJSON = new JSONArray(arrayZonesString);
+		/*
+		 * 3 Data Objects Created
+		 * AddInfoZones
+		 * ListOfZones
+		 * ListOfMarkers
+		 */
+		addInfoZoneHm = new HashMap<String,AddInfoZone>();
+		zonesList = new HashMap<String,ArrayList<String>>();
+		markersZoneList = new ArrayList<Marker>();
+		markersSubZoneList = new ArrayList<Marker>();
+
+		//Zone1 Loop
+		for (int i=0;i<arrayZonesJSON.length();i++){
+			JSONObject curZoneJSONObject = arrayZonesJSON.getJSONObject(i);
+			//Get Attributs
+			int curZoneId = curZoneJSONObject.getInt("id");
+			String curZoneName = curZoneJSONObject.getString("name");
+			Double curZoneLatitude = curZoneJSONObject.getDouble("latitude");
+			Double curZoneLontitude = curZoneJSONObject.getDouble("longitude");
+			String curZoneDescription = curZoneJSONObject.getString("description");
+			String curZoneUrlPic = curZoneJSONObject.getString("url_photo");
+			//MarkerList
+			//options
+			MarkerOptions curZoneMarkerOptions = new MarkerOptions()
+			.position(new LatLng(curZoneLatitude, curZoneLontitude))
+			.title(curZoneName)
 			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-			arrayMarkers.add(markerOptions);
+			//marker
+			Marker currentZoneMarker = googleMap.addMarker(curZoneMarkerOptions);
+			markersZoneList.add(currentZoneMarker);
+			//ZoneList
+			ArrayList<String> subZoneList = new ArrayList<String>();
+			//PicList
+			ArrayList<String> picList = new ArrayList<String>();
+
+			//Zone2 Loop
+			for(int j=0;j<curZoneJSONObject.getJSONArray("locations").length();j++){
+				JSONObject curSubZoneJSONObject = curZoneJSONObject.getJSONArray("locations").getJSONObject(j);
+				//Get Attributs
+				int curSubZoneId = curSubZoneJSONObject.getInt("id");
+				String curSubZoneName = curSubZoneJSONObject.getString("name");
+				Double curSubZoneLatitude = curSubZoneJSONObject.getDouble("latitude");
+				Double curSubZoneLontitude = curSubZoneJSONObject.getDouble("longitude");
+				String curSubZoneDescription = curSubZoneJSONObject.getString("description");
+				String curSubZoneUrlPic = curSubZoneJSONObject.getString("url_photo");
+				//int curSubZoneZoneId = curSubZoneJSONObject.getInt("id_zone");
+				//MarkerList
+				//options
+				MarkerOptions curSubZoneMarkerOptions = new MarkerOptions()
+				.position(new LatLng(curSubZoneLatitude, curSubZoneLontitude))
+				.title(curSubZoneName)
+				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+				//marker
+				Marker currentSubZoneMarker = googleMap.addMarker(curSubZoneMarkerOptions);
+				markersSubZoneList.add(currentSubZoneMarker);
+				//ZoneList
+				subZoneList.add(curSubZoneName);
+				//AddInfoZone
+				AddInfoZone curSubZoneInfo = new AddInfoZone(curSubZoneId, curSubZoneName, curSubZoneDescription, curSubZoneUrlPic);
+				addInfoZoneHm.put(curSubZoneName, curSubZoneInfo);
+				//picList
+				picList.add(curSubZoneUrlPic);
+
+			}
+			// ZoneList
+			zonesList.put(curZoneName, subZoneList);
+			//AddInfoZone
+			AddInfoZone curZoneInfo = new AddInfoZone(curZoneId, curZoneName, curZoneDescription, curZoneUrlPic, picList);
+			addInfoZoneHm.put(curZoneName, curZoneInfo);
 		}
-		buildingMarkers.put(buildings.get(0).getName(), arrayMarkers);
+		//Log.v("addInfoZoneHm",addInfoZoneHm.toString());
+	}
+
+	private void setMarkers(){		
+		for(int i=0;i<markersZoneList.size();i++){
+			markersZoneList.get(i).setVisible(true);
+		}
+		for(int j=0;j<markersSubZoneList.size();j++){
+			markersSubZoneList.get(j).setVisible(false);
+		}
 	}
 
 	@Override
 	public void onInfoWindowClick(Marker marker) {
-		if(activeSubMarkers == null){
-			activeSubMarkers = new ArrayList<Marker>();
-		}
-		else{
-			activeSubMarkers.clear();
-		}
-		String markerClickedName = marker.getTitle();
-		if (buildingList.contains(markerClickedName)){	
-			marker.setVisible(false);
-			ArrayList<MarkerOptions> markers = buildingMarkers.get(markerClickedName);
-			for(int i=0;i<markers.size();i++){
-				Marker currentMarker = googleMap.addMarker(markers.get(i));
-				activeSubMarkers.add(currentMarker);
-			}
-			googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(marker.getPosition() , 19.1f) );
+
+		if(zonesList.containsKey(marker.getTitle())){
+			googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(marker.getPosition() , 17f) );
+			hideZoneMarker();
 		}
 		else{
 			Intent intent = new Intent(getActivity(), StatisticsActivity.class);
 			intent.putExtra("TITLE", marker.getTitle());
-			intent.putExtra("SUBTITLE", "description to do ...");
+			intent.putExtra("SUBTITLE", addInfoZoneHm.get(marker.getTitle()).getDescription());
 			startActivity(intent);
 		}
 	}
@@ -148,18 +195,55 @@ public class FragmentMap extends Fragment implements OnInfoWindowClickListener, 
 	@Override
 	public View getInfoContents(Marker marker) {
 		View view;
-		String markerClickedName = marker.getTitle();
 		// Getting view from the layout file info_window_layout
-		if (buildingList.contains(markerClickedName)){
-			activeMarker = marker;
-			view = getActivity().getLayoutInflater().inflate(R.layout.map_infowindow_building, null);
-			TextView buildingName = (TextView)view.findViewById(R.id.building_name);
-			buildingName.setText(marker.getTitle());
+		if(zonesList.containsKey(marker.getTitle())){
+			view = getActivity().getLayoutInflater().inflate(R.layout.map_infowindow_zone, null);
+			TextView zoneName = (TextView)view.findViewById(R.id.zone_name);
+			TextView zoneDescription = (TextView)view.findViewById(R.id.zone_description);
+			final ImageView zonePic = (ImageView)view.findViewById(R.id.zone_pic);
+			AddInfoZone info = addInfoZoneHm.get(marker.getTitle());
+			zoneName.setText(marker.getTitle());
+			zoneDescription.setText(info.getDescription());
+
+			String urlZonePic = info.getUrlPic();
+			Target target = new Target() {
+				@Override
+				public void onBitmapFailed(Drawable arg0) {
+				}
+				@Override
+				public void onBitmapLoaded(Bitmap bmp, LoadedFrom from) {
+					zonePic.setImageBitmap(bmp);	
+				}
+				@Override
+				public void onPrepareLoad(Drawable arg0) {
+				}
+			};
+			Picasso.with(getActivity()).load(urlZonePic).into(target);
+
 		}
 		else{
-			view = getActivity().getLayoutInflater().inflate(R.layout.map_infowindow_location, null);
-			TextView locationName = (TextView)view.findViewById(R.id.location_name);
-			locationName.setText(marker.getTitle());
+			view = getActivity().getLayoutInflater().inflate(R.layout.map_infowindow_subzone, null);
+			TextView subZoneName = (TextView)view.findViewById(R.id.subzone_name);
+			TextView subZoneDescription = (TextView)view.findViewById(R.id.subzone_description);
+			final ImageView subZonePic = (ImageView)view.findViewById(R.id.subzone_pic);
+			AddInfoZone info = addInfoZoneHm.get(marker.getTitle());
+			subZoneName.setText(marker.getTitle());
+			subZoneDescription.setText(info.getDescription());
+			
+			String urlSubZonePic = info.getUrlPic();
+			Target target = new Target() {
+				@Override
+				public void onBitmapFailed(Drawable arg0) {
+				}
+				@Override
+				public void onBitmapLoaded(Bitmap bmp, LoadedFrom from) {
+					subZonePic.setImageBitmap(bmp);	
+				}
+				@Override
+				public void onPrepareLoad(Drawable arg0) {
+				}
+			};
+			Picasso.with(getActivity()).load(urlSubZonePic).into(target);
 		}
 		return view;
 	}
@@ -170,26 +254,38 @@ public class FragmentMap extends Fragment implements OnInfoWindowClickListener, 
 	}
 
 	@Override
-	public void onMapClick(LatLng latLng) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-		alert.setTitle("Reset position?");
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				Log.v("XXXX",activeSubMarkers.toString());
-				for(int i=0;i< activeSubMarkers.size();i++){
-					activeSubMarkers.get(i).setVisible(false);
-				}
-				activeMarker.setVisible(true);
-				//final LatLng GeorgiaTech = new LatLng(33.775771, -84.396302);
-				googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(activeMarker.getPosition() , 14.5f) );
+	public void onCameraChange(CameraPosition position) {
+		if(previousZoomLevel != position.zoom)
+		{
+			isZooming = true;
+			if(position.zoom >= 17f){
+				hideZoneMarker();
 			}
-		});
+			else if(position.zoom < 17f){
+				hideSubZoneMarker();
+			}          
+		}
+		else{
+			isZooming = false;
+		}
+		previousZoomLevel = position.zoom;		
+	}
 
-		alert.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-			}
-		});
-		alert.show();
+	private void hideZoneMarker(){
+		for(int i=0;i<markersZoneList.size();i++){
+			markersZoneList.get(i).setVisible(false);
+		}
+		for(int j=0;j<markersSubZoneList.size();j++){
+			markersSubZoneList.get(j).setVisible(true);
+		}
+	}
+
+	private void hideSubZoneMarker(){
+		for(int i=0;i<markersZoneList.size();i++){
+			markersZoneList.get(i).setVisible(true);
+		}
+		for(int j=0;j<markersSubZoneList.size();j++){
+			markersSubZoneList.get(j).setVisible(false);
+		}
 	}
 }

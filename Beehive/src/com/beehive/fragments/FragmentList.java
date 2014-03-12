@@ -2,10 +2,13 @@ package com.beehive.fragments;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.beehive.activities.StatisticsActivity;
-import com.beehive.objects.Building;
-import com.beehive.objects.Location;
-import com.beehive.tools.LocationListAdapter;
+import com.beehive.objects.Zone;
+import com.beehive.tools.ZonesListAdapter;
 import com.beehive.R;
 
 import android.content.Intent;
@@ -23,8 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FragmentList extends ListFragment implements OnItemClickListener, OnClickListener {
-	
-	private ArrayList<Location> locations;
+
+	private ArrayList<Zone> zonesList;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,8 +42,13 @@ public class FragmentList extends ListFragment implements OnItemClickListener, O
 		LinearLayout footer = (LinearLayout)getActivity().findViewById(R.id.footer);
 		ListView locationsList = (ListView) getActivity().findViewById(android.R.id.list);
 		//Data Request
-		requestData();
-		LocationListAdapter adapter = new LocationListAdapter(getActivity().getApplicationContext(),R.layout.locationslist_row, locations);
+		try {
+			requestData();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ZonesListAdapter adapter = new ZonesListAdapter(getActivity().getApplicationContext(),R.layout.zoneslist_row_subzone, zonesList);
 		setListAdapter(adapter);
 		//Setting up the listner
 		footer.setOnClickListener(this);
@@ -49,20 +57,37 @@ public class FragmentList extends ListFragment implements OnItemClickListener, O
 		super.onActivityCreated(savedInstanceState);
 	}
 
-	private void requestData(){
-		//Creation des objects Locations
-		Location build = new Location(0, "Clough", "N/A", 0, 0, 0, "N/A");
-		build.setIsCategory(true);
-		Location loc1 = new Location(1, "Starbucks", "http://lala/", 33.774258, -84.396348, 0.80, "now");
-		Location loc2 = new Location(2, "Conference Room", "http://lala/", 33.774930, -84.396269, 0.20, "in 5mn");
-		Location loc3 = new Location(3, "Big Hall", "http://lala/", 33.774635, -84.396465, 0.65, "tommorow");
-		Location loc4 = new Location(4, "Meeting Room", "http://lala/", 33.775038, -84.396449, 0.10, "now");
-		locations = new ArrayList<Location>();
-		locations.add(build);
-		locations.add(loc1);
-		locations.add(loc2);
-		locations.add(loc3);
-		locations.add(loc4);
+	private void requestData() throws JSONException{
+		Bundle bundle = getArguments();
+		String arrayZonesString = bundle.getString("arrayZonesString");
+		JSONArray arrayZonesJSON = new JSONArray(arrayZonesString);
+		//Zone1 Loop
+		zonesList = new ArrayList<Zone>();
+		for (int i=0;i<arrayZonesJSON.length();i++){
+			JSONObject curZoneJSONObject = arrayZonesJSON.getJSONObject(i);
+			//Get Attributs
+			int curZoneId = curZoneJSONObject.getInt("id");
+			String curZoneName = curZoneJSONObject.getString("name");
+			Double curZoneLatitude = curZoneJSONObject.getDouble("latitude");
+			Double curZoneLontitude = curZoneJSONObject.getDouble("longitude");
+			String curZoneDescription = curZoneJSONObject.getString("description");
+			String curZoneUrlPic = curZoneJSONObject.getString("url_photo");
+			Zone curZone = new Zone(curZoneId, curZoneName, curZoneLatitude, curZoneLontitude, curZoneDescription, curZoneUrlPic);
+			zonesList.add(curZone);
+			for(int j=0;j<curZoneJSONObject.getJSONArray("locations").length();j++){
+				JSONObject curSubZoneJSONObject = curZoneJSONObject.getJSONArray("locations").getJSONObject(j);
+				//Get Attributs
+				int curSubZoneId = curSubZoneJSONObject.getInt("id");
+				String curSubZoneName = curSubZoneJSONObject.getString("name");
+				Double curSubZoneLatitude = curSubZoneJSONObject.getDouble("latitude");
+				Double curSubZoneLontitude = curSubZoneJSONObject.getDouble("longitude");
+				String curSubZoneDescription = curSubZoneJSONObject.getString("description");
+				String curSubZoneUrlPic = curSubZoneJSONObject.getString("url_photo");
+				Zone curSubZone = new Zone(curSubZoneId, curSubZoneName, curSubZoneLatitude, curSubZoneLontitude, curSubZoneDescription, curSubZoneUrlPic);
+				curSubZone.setSubZone(true);
+				zonesList.add(curSubZone);
+			}
+		}
 	}
 
 	@Override
