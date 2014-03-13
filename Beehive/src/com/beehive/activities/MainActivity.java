@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.beehive.fragments.FragmentList;
 import com.beehive.fragments.FragmentMap;
-import com.beehive.tools.JSONDownloader;
+import com.beehive.tools.StaticDataDownloader;
 import com.beehive.R;
 
 import android.app.ActionBar;
@@ -23,7 +23,7 @@ import android.view.MenuItem;
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
 	
-	JSONDownloader jsonDownloader;
+	StaticDataDownloader jsonDownloader;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -80,7 +80,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 		try {
 			urlZones = new URL("http://api.letsbeehive.tk/zones/listall");
-			jsonDownloader = new JSONDownloader(this);
+			jsonDownloader = new StaticDataDownloader(this);
 			jsonDownloader.execute(urlZones);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

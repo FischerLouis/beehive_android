@@ -42,10 +42,11 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 		else{
 			rowView = inflater.inflate(R.layout.zoneslist_row_subzone, parent, false);
 			TextView title = (TextView) rowView.findViewById(R.id.title);
-			TextView subtitle = (TextView) rowView.findViewById(R.id.subtitle);
+			TextView description = (TextView) rowView.findViewById(R.id.subtitle);
 			final ImageView subZonePic = (ImageView) rowView.findViewById(R.id.pics);
+			
 			title.setText(curZone.getName());
-			subtitle.setText(curZone.getDescription());
+			description.setText(curZone.getDescription());
 			Target target = new Target() {
 				@Override
 				public void onBitmapFailed(Drawable arg0) {

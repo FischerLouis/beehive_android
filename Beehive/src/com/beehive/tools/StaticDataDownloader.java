@@ -7,11 +7,11 @@ import org.json.JSONException;
 import android.content.Context;
 import android.os.AsyncTask;
 
-public class JSONDownloader extends AsyncTask<URL, Integer, String> {
+public class StaticDataDownloader extends AsyncTask<URL, Integer, String> {
 	
 	Context context;
 	
-	public JSONDownloader(Context context){
+	public StaticDataDownloader(Context context){
 		this.context = context;
 	}
 

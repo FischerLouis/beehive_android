@@ -1,6 +1,8 @@
 package com.beehive.fragments;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,6 +10,7 @@ import org.json.JSONObject;
 
 import com.beehive.activities.StatisticsActivity;
 import com.beehive.objects.Zone;
+import com.beehive.tools.RealTimeDataUpdater;
 import com.beehive.tools.ZonesListAdapter;
 import com.beehive.R;
 
@@ -41,13 +44,31 @@ public class FragmentList extends ListFragment implements OnItemClickListener, O
 		//Retrieving the views
 		LinearLayout footer = (LinearLayout)getActivity().findViewById(R.id.footer);
 		ListView locationsList = (ListView) getActivity().findViewById(android.R.id.list);
-		//Data Request
+		//Static Data Request
 		try {
-			requestData();
+			requestStaticData();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//RealTime Data Request
+		/*RealTimeDataUpdater updater = new RealTimeDataUpdater(getActivity());
+		try {
+			updater.execute();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+
 		ZonesListAdapter adapter = new ZonesListAdapter(getActivity().getApplicationContext(),R.layout.zoneslist_row_subzone, zonesList);
 		setListAdapter(adapter);
 		//Setting up the listner
@@ -57,7 +78,7 @@ public class FragmentList extends ListFragment implements OnItemClickListener, O
 		super.onActivityCreated(savedInstanceState);
 	}
 
-	private void requestData() throws JSONException{
+	private void requestStaticData() throws JSONException {
 		Bundle bundle = getArguments();
 		String arrayZonesString = bundle.getString("arrayZonesString");
 		JSONArray arrayZonesJSON = new JSONArray(arrayZonesString);
@@ -72,7 +93,8 @@ public class FragmentList extends ListFragment implements OnItemClickListener, O
 			Double curZoneLontitude = curZoneJSONObject.getDouble("longitude");
 			String curZoneDescription = curZoneJSONObject.getString("description");
 			String curZoneUrlPic = curZoneJSONObject.getString("url_photo");
-			Zone curZone = new Zone(curZoneId, curZoneName, curZoneLatitude, curZoneLontitude, curZoneDescription, curZoneUrlPic);
+			//Creat Object
+			Zone curZone = new Zone(curZoneId, curZoneName, curZoneLatitude, curZoneLontitude, curZoneDescription, curZoneUrlPic, false);
 			zonesList.add(curZone);
 			for(int j=0;j<curZoneJSONObject.getJSONArray("locations").length();j++){
 				JSONObject curSubZoneJSONObject = curZoneJSONObject.getJSONArray("locations").getJSONObject(j);
@@ -83,8 +105,8 @@ public class FragmentList extends ListFragment implements OnItemClickListener, O
 				Double curSubZoneLontitude = curSubZoneJSONObject.getDouble("longitude");
 				String curSubZoneDescription = curSubZoneJSONObject.getString("description");
 				String curSubZoneUrlPic = curSubZoneJSONObject.getString("url_photo");
-				Zone curSubZone = new Zone(curSubZoneId, curSubZoneName, curSubZoneLatitude, curSubZoneLontitude, curSubZoneDescription, curSubZoneUrlPic);
-				curSubZone.setSubZone(true);
+				//Creat object
+				Zone curSubZone = new Zone(curSubZoneId, curSubZoneName, curSubZoneLatitude, curSubZoneLontitude, curSubZoneDescription, curSubZoneUrlPic, true);
 				zonesList.add(curSubZone);
 			}
 		}
