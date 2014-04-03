@@ -1,116 +1,230 @@
 package com.beehive.activities;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
+import org.json.JSONArray;
+import org.json.JSONException;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.beehive.fragments.FragmentList;
 import com.beehive.fragments.FragmentMap;
+import com.beehive.tools.Constants;
+import com.beehive.tools.FragmentListCommunicator;
+import com.beehive.tools.FragmentMapCommunicator;
 import com.beehive.tools.StaticDataDownloader;
 import com.beehive.R;
 
 import android.app.ActionBar;
+import android.app.ActionBar.TabListener;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
-	
-	StaticDataDownloader jsonDownloader;
 
-	/**
-	 * The {@link android.support.v4.view.PagerAdapter} that will provide
-	 * fragments for each of the sections. We use a
-	 * {@link android.support.v4.app.FragmentPagerAdapter} derivative, which
-	 * will keep every loaded fragment in memory. If this becomes too memory
-	 * intensive, it may be best to switch to a
-	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-	 */
-	SectionsPagerAdapter mSectionsPagerAdapter;
+	private Menu optionsMenu;
+	private RequestQueue queue;
+	private boolean isRefreshing = false;
+	private SharedPreferences prefs;
 
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
-	ViewPager mViewPager;
+	public static ArrayList<Fragment> listFragments;
+	private SectionsPagerAdapter sectionsPagerAdapter;
+	private ViewPager viewPager;
+	public FragmentMapCommunicator fragmentMapCommunicator;
+	public FragmentListCommunicator fragmentListCommunicator;
+
+	// on Activity
+	public boolean loadMapFromCache = false;
+	public boolean loadListFromCache = false;
+	public JSONArray jsonCached;
+
+	private int curTabId = 0;
+
+	TabListener tabListener = this;
+	Context context = this;
+
+	StaticDataDownloader staticDataloader;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		// Url zones
-		URL urlZones;
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		// Create the adapter that will return a fragment for each of the three
-		// primary sections of the app.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
 		// Set up the ViewPager with the sections adapter.
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mViewPager.setAdapter(mSectionsPagerAdapter);
+		viewPager = (ViewPager) findViewById(R.id.pager);
+		listFragments = new ArrayList<Fragment>();
+		FragmentMap fragmentMap = FragmentMap.newInstance();
+		FragmentList fragmentList = FragmentList.newInstance();
+		listFragments.add(fragmentMap);
+		listFragments.add(fragmentList);
+		sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),listFragments);
+		viewPager.setAdapter(sectionsPagerAdapter);
 
-		// When swiping between different sections, select the corresponding
-		// tab. We can also use ActionBar.Tab#select() to do this if we have
-		// a reference to the Tab.
-		mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+		viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
 				actionBar.setSelectedNavigationItem(position);
 			}
 		});
-
 		// For each of the sections in the app, add a tab to the action bar.
-		for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-			// Create a tab with text corresponding to the page title defined by
-			// the adapter. Also specify this Activity object, which implements
-			// the TabListener interface, as the callback (listener) for when
-			// this tab is selected.
-			actionBar.addTab(actionBar.newTab().setText(mSectionsPagerAdapter.getPageTitle(i)).setTabListener(this));
+		for (int i = 0; i < sectionsPagerAdapter.getCount(); i++) {
+			actionBar.addTab(actionBar.newTab().setText(sectionsPagerAdapter.getPageTitle(i)).setTabListener(tabListener));
 		}
-		try {
-			urlZones = new URL("http://api.letsbeehive.tk/zones/listall");
-			jsonDownloader = new StaticDataDownloader(this);
-			jsonDownloader.execute(urlZones);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();  // Always call the superclass method first
+		prefs.edit().putInt("curTabId", curTabId).commit();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();  // Always call the superclass method first
+		// PREFERENCES
+		prefs = this.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
+
+		//SELECT PREVIOUS TAB (IF EXIST)
+		if(prefs.contains("curTabId")){
+			viewPager.setCurrentItem(prefs.getInt("curTabId", 0));
 		}
+		// Init Requests Queue
+		queue = Volley.newRequestQueue(this);
+		// REQUESTS DATA (STATIC & REALTIME)
+		dataRequest();
+	}
+
+	private void setRefreshActionButtonState(final boolean refreshing) {
+		if (optionsMenu != null) {
+			final MenuItem refreshItem = optionsMenu.findItem(R.id.action_refresh);
+			if (refreshItem != null) {
+				if (refreshing) {
+					refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
+					refreshItem.expandActionView();
+				} else {
+					refreshItem.collapseActionView();
+					refreshItem.setActionView(null);
+				}
+			}
+		}
+	}
+
+	// STATIC DATA REQUEST
+	private void dataRequest(){
+
+		// CACHE
+		if(queue.getCache().get(Constants.URL_STATIC)!=null){
+			Log.v("REQUEST","Cache");
+			//Static Data from Cache
+			try {				
+				String cachedResponse = new String(queue.getCache().get(Constants.URL_STATIC).data);
+				jsonCached = new JSONArray(cachedResponse);
+				loadMapFromCache = true;
+				loadListFromCache = true;
+				realTimeDataRequest();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		// NO CACHE
+		else{
+			Log.v("REQUEST","No Cache");			
+			//Loading Windows
+			final ProgressDialog progress = new ProgressDialog(this);
+			progress.setTitle("Loading");
+			progress.setMessage("Wait while loading...");
+			progress.show();
+			//Static Data from Server
+			JsonArrayRequest staticDataReq = new JsonArrayRequest(Constants.URL_STATIC, new Response.Listener<JSONArray>(){
+				@Override
+				public void onResponse(JSONArray response) {
+					if(fragmentMapCommunicator != null)
+						fragmentMapCommunicator.passStaticData(response);
+					if(fragmentListCommunicator != null)
+						fragmentListCommunicator.passStaticData(response);
+					realTimeDataRequest();	
+					progress.dismiss();
+				}
+			}, new Response.ErrorListener() {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					VolleyLog.e("Error: ", error.getMessage());
+				}
+			});
+			queue.add(staticDataReq);
+		}
+	}
+
+	// RealTime Request
+	private void realTimeDataRequest(){
+		JsonArrayRequest realTimeDataReq = new JsonArrayRequest(Constants.URL_DYNAMIC_NOW, new Response.Listener<JSONArray>(){
+			@Override
+			public void onResponse(JSONArray response) {
+				if(fragmentMapCommunicator != null)
+					fragmentMapCommunicator.passRealTimeData(response);	
+				if(fragmentListCommunicator != null)
+					fragmentListCommunicator.passRealTimeData(response);	
+				if(isRefreshing){
+					setRefreshActionButtonState(false);
+					isRefreshing = false;
+				}
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				VolleyLog.e("Error: ", error.getMessage());
+			}
+		});
+		queue.add(realTimeDataReq);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		this.optionsMenu = menu;
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main_actions, menu);
+		// Associate searchable configuration with the SearchView
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
 		return true;
 	}
 
 	@Override
-	public void onTabSelected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
-		// When the given tab is selected, switch to the corresponding page in
-		// the ViewPager.
-		mViewPager.setCurrentItem(tab.getPosition());
+	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+		viewPager.setCurrentItem(tab.getPosition());
+		curTabId = tab.getPosition();
 	}
 
 	@Override
-	public void onTabUnselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 
 	@Override
-	public void onTabReselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 
 	/**
@@ -119,61 +233,37 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
-		if (itemId == R.id.action_search) {
-			// search action
-			return true;
-		} else {
-			return super.onOptionsItemSelected(item);
+		switch(itemId){
+		case R.id.action_search:
+			Toast.makeText(this, "Action search selected", Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.action_refresh:
+			isRefreshing = true;
+			setRefreshActionButtonState(true);
+			item.expandActionView();
+			realTimeDataRequest();
+			break;
+		default:
+			break;
 		}
+		return true;
 	}
 
-
-	/**
-	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-	 * one of the sections/tabs/pages.
-	 */
-	public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-		public SectionsPagerAdapter(FragmentManager fm) {
+	public class SectionsPagerAdapter  extends FragmentStatePagerAdapter  {
+		private ArrayList<Fragment> list;
+		public SectionsPagerAdapter (FragmentManager fm, ArrayList<Fragment> list) {
 			super(fm);
+			this.list = list;
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			String arrayZonesString = null;
-			try {
-				arrayZonesString = jsonDownloader.get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Bundle args = new Bundle();
-	        args.putString("arrayZonesString",arrayZonesString);
-			switch (position) {
-			case 0:
-				// Map Fragment
-				FragmentMap fragmentMap = new FragmentMap();
-		        //put data to bundle
-		        fragmentMap.setArguments(args);
-				return fragmentMap;
-			case 1:
-				// Map Fragment
-				FragmentList fragmentList = new FragmentList();
-		        //put data to bundle
-				fragmentList.setArguments(args);
-				return fragmentList;
-			}
-
-			return null;
+			return list.get(position);
 		}
 
 		@Override
 		public int getCount() {
-			// Show 2 total pages.
-			return 2;
+			return list.size();
 		}
 
 		@Override

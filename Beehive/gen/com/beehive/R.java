@@ -231,74 +231,90 @@ containing a value of this type.
         public static final int common_signin_btn_text_normal_light=0x7f020015;
         public static final int common_signin_btn_text_pressed_dark=0x7f020016;
         public static final int common_signin_btn_text_pressed_light=0x7f020017;
-        public static final int conference_icon=0x7f020018;
-        public static final int entrance_icon=0x7f020019;
-        public static final int ic_action_search=0x7f02001a;
-        public static final int ic_launcher=0x7f02001b;
-        public static final int ic_plusone_medium_off_client=0x7f02001c;
-        public static final int ic_plusone_small_off_client=0x7f02001d;
-        public static final int ic_plusone_standard_off_client=0x7f02001e;
-        public static final int ic_plusone_tall_off_client=0x7f02001f;
-        public static final int library_icon=0x7f020020;
-        public static final int location_background=0x7f020021;
-        public static final int meeting_icon=0x7f020022;
-        public static final int starbucks_icon=0x7f020023;
+        public static final int ic_action_refresh=0x7f020018;
+        public static final int ic_action_search=0x7f020019;
+        public static final int ic_launcher=0x7f02001a;
+        public static final int ic_plusone_medium_off_client=0x7f02001b;
+        public static final int ic_plusone_small_off_client=0x7f02001c;
+        public static final int ic_plusone_standard_off_client=0x7f02001d;
+        public static final int ic_plusone_tall_off_client=0x7f02001e;
+        public static final int location_background=0x7f02001f;
     }
     public static final class id {
-        public static final int action_search=0x7f05001e;
-        public static final int action_settings=0x7f05001f;
-        public static final int chart=0x7f050008;
-        public static final int footer=0x7f05000c;
-        public static final int footer_contribution=0x7f050009;
+        public static final int action_refresh=0x7f05002f;
+        public static final int action_search=0x7f050030;
+        public static final int action_settings=0x7f050031;
+        public static final int average_week_chart=0x7f05000a;
+        public static final int fri_chart=0x7f050013;
         public static final int header=0x7f050006;
+        public static final int hsw=0x7f05000d;
         public static final int hybrid=0x7f050004;
-        public static final int icon=0x7f05000a;
-        public static final int info_layout=0x7f05001a;
-        public static final int map=0x7f05000e;
-        public static final int mapLayout=0x7f05000d;
+        public static final int info_layout=0x7f050027;
+        public static final int inner_layout=0x7f05000e;
+        public static final int map=0x7f050017;
+        public static final int mapLayout=0x7f050016;
+        public static final int mon_chart=0x7f05000f;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
-        public static final int occupancy=0x7f050013;
-        public static final int option=0x7f05000b;
+        public static final int occupancy=0x7f05002b;
+        public static final int occupancy_label=0x7f05002a;
+        public static final int occupancy_layout=0x7f05001c;
         public static final int pager=0x7f050005;
-        public static final int pics=0x7f050019;
+        public static final int pics=0x7f050026;
+        public static final int sat_chart=0x7f050014;
         public static final int satellite=0x7f050002;
         public static final int separator=0x7f050007;
-        public static final int subtitle=0x7f05001c;
-        public static final int subzone_description=0x7f050012;
-        public static final int subzone_name=0x7f050010;
-        public static final int subzone_pic=0x7f05000f;
-        public static final int subzone_separator=0x7f050011;
+        public static final int subtitle=0x7f050029;
+        public static final int subzone_description=0x7f05001b;
+        public static final int subzone_name=0x7f050019;
+        public static final int subzone_occupancy=0x7f05001e;
+        public static final int subzone_occupancy_label=0x7f05001d;
+        public static final int subzone_pic=0x7f050018;
+        public static final int subzone_separator=0x7f05001a;
+        public static final int subzone_timetogo=0x7f050021;
+        public static final int subzone_timetogo_label=0x7f050020;
+        public static final int sun_chart=0x7f050015;
         public static final int terrain=0x7f050003;
-        public static final int time_to_go=0x7f050014;
-        public static final int title=0x7f05001b;
-        public static final int zone_description=0x7f050018;
-        public static final int zone_name=0x7f050016;
-        public static final int zone_pic=0x7f050015;
-        public static final int zone_separator=0x7f050017;
-        public static final int zone_title=0x7f05001d;
+        public static final int thu_chart=0x7f050012;
+        public static final int time_to_go=0x7f05002d;
+        public static final int time_to_go_label=0x7f05002c;
+        public static final int timetogo_layout=0x7f05001f;
+        public static final int title=0x7f050028;
+        public static final int title_day=0x7f05000c;
+        public static final int title_day_layout=0x7f05000b;
+        public static final int title_week=0x7f050009;
+        public static final int title_week_layout=0x7f050008;
+        public static final int tue_chart=0x7f050010;
+        public static final int wed_chart=0x7f050011;
+        public static final int zone_description=0x7f050025;
+        public static final int zone_name=0x7f050023;
+        public static final int zone_pic=0x7f050022;
+        public static final int zone_separator=0x7f050024;
+        public static final int zone_title=0x7f05002e;
     }
     public static final class integer {
         public static final int google_play_services_version=0x7f070000;
     }
     public static final class layout {
-        public static final int activity_main=0x7f030000;
-        public static final int activity_statistics=0x7f030001;
-        public static final int fragment_list=0x7f030002;
-        public static final int fragment_map=0x7f030003;
-        public static final int map_infowindow_subzone=0x7f030004;
-        public static final int map_infowindow_zone=0x7f030005;
-        public static final int zoneslist_row_subzone=0x7f030006;
-        public static final int zoneslist_row_zone=0x7f030007;
+        public static final int actionbar_indeterminate_progress=0x7f030000;
+        public static final int activity_main=0x7f030001;
+        public static final int activity_statistics=0x7f030002;
+        public static final int fragment_list=0x7f030003;
+        public static final int fragment_map=0x7f030004;
+        public static final int map_infowindow_subzone=0x7f030005;
+        public static final int map_infowindow_zone=0x7f030006;
+        public static final int searchable=0x7f030007;
+        public static final int zoneslist_row_subzone=0x7f030008;
+        public static final int zoneslist_row_zone=0x7f030009;
     }
     public static final class menu {
         public static final int activity_main_actions=0x7f0a0000;
         public static final int main=0x7f0a0001;
     }
     public static final class string {
-        public static final int action_search=0x7f06001f;
-        public static final int action_settings=0x7f06001b;
-        public static final int app_name=0x7f06001a;
+        public static final int action_search=0x7f060020;
+        public static final int action_settings=0x7f06001c;
+        public static final int app_name=0x7f06001b;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
          */
@@ -393,13 +409,22 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f060013;
-        public static final int footer=0x7f06001e;
-        public static final int no_items=0x7f060023;
-        public static final int search_title=0x7f060020;
-        public static final int title_activity_statistics=0x7f060021;
-        public static final int title_options=0x7f060022;
-        public static final int title_section1=0x7f06001c;
-        public static final int title_section2=0x7f06001d;
+        public static final int footer=0x7f06001f;
+        public static final int id_tag_key=0x7f060027;
+        /**  Location client code resources (prefix with location_client) 
+         */
+        public static final int location_client_powered_by_google=0x7f06001a;
+        public static final int no_items=0x7f060026;
+        public static final int refresh_title=0x7f060022;
+        public static final int search_hint=0x7f060025;
+        public static final int search_title=0x7f060021;
+        public static final int subzone_tag_key=0x7f060028;
+        public static final int title_activity_statistics=0x7f060023;
+        public static final int title_day=0x7f06002a;
+        public static final int title_options=0x7f060024;
+        public static final int title_section1=0x7f06001d;
+        public static final int title_section2=0x7f06001e;
+        public static final int title_week=0x7f060029;
     }
     public static final class style {
         /** 

@@ -38,15 +38,24 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 			rowView = inflater.inflate(R.layout.zoneslist_row_zone, parent, false);
 			TextView title = (TextView) rowView.findViewById(R.id.zone_title);
 			title.setText(curZone.getName());
+			rowView.setTag(R.string.subzone_tag_key, "zone");
 		}
 		else{
 			rowView = inflater.inflate(R.layout.zoneslist_row_subzone, parent, false);
 			TextView title = (TextView) rowView.findViewById(R.id.title);
 			TextView description = (TextView) rowView.findViewById(R.id.subtitle);
+			TextView occupancy = (TextView) rowView.findViewById(R.id.occupancy);
+			TextView timeToGo = (TextView) rowView.findViewById(R.id.time_to_go);
+			int viewId = curZone.getId();
+			rowView.setTag(R.string.subzone_tag_key, "subZone");
 			final ImageView subZonePic = (ImageView) rowView.findViewById(R.id.pics);
 			
 			title.setText(curZone.getName());
 			description.setText(curZone.getDescription());
+			occupancy.setText(curZone.getOccupancy());
+			timeToGo.setText(curZone.getTimeToGo());
+			rowView.setTag(R.string.id_tag_key, viewId);
+
 			Target target = new Target() {
 				@Override
 				public void onBitmapFailed(Drawable arg0) {

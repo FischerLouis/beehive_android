@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_search"
-          android:title="@string/search_title"
-          android:icon="@drawable/ic_action_search"
-          android:showAsAction="collapseActionView|ifRoom" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_action_refresh"
+        android:showAsAction="always"
+        android:title="@string/refresh_title"/>
+    <item
+        android:id="@+id/action_search"
+        android:orderInCategory="200"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="always"
+        android:title="@string/search_title"
+        android:actionViewClass="android.widget.SearchView"/>
+
 </menu>

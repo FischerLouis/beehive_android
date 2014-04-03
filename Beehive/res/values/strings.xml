@@ -8,9 +8,18 @@
     <string name="footer">Footer</string>   
     <string name="action_search">Search</string>
     <string name="search_title">Search</string>
+    <string name="refresh_title">Refresh</string>
     <string name="title_activity_statistics">Statistics</string>
     <string name="title_options">Options</string>
     
-    <string name="no_items">No items to display yet</string>   
+    <string name="search_hint">Where do you want to go ?</string>
+    
+    <string name="no_items">No items to display yet</string>  
+    
+    <string name="id_tag_key">id</string>
+    <string name="subzone_tag_key">subzone</string>
+    
+     <string name="title_week">WEEKLY</string>
+     <string name="title_day">DAILY</string>
 
 </resources>

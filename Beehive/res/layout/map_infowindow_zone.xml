@@ -11,7 +11,7 @@
         android:layout_marginRight="2dp"
         android:contentDescription="TODO"
         android:padding="1dp"
-        android:src="@drawable/library_icon" />
+        android:src="@drawable/ic_launcher" />
 
     <!-- /// BUILDING NAME /// -->
 

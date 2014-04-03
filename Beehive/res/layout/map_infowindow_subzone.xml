@@ -13,7 +13,7 @@
         android:layout_marginRight="2dp"
         android:contentDescription="TODO"
         android:padding="1dp"
-        android:src="@drawable/library_icon" />
+        android:src="@drawable/ic_launcher" />
 
     <TextView
         android:id="@+id/subzone_name"
@@ -47,6 +47,7 @@
     <!-- /// OCCUPANCY /// -->
 
     <LinearLayout
+        android:id="@+id/occupancy_layout"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/subzone_description"
@@ -54,24 +55,53 @@
         android:orientation="horizontal" >
 
         <TextView
-            android:id="@+id/occupancy"
+            android:id="@+id/subzone_occupancy_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="Occupancy: "
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/subzone_occupancy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:maxLines="1"
-            android:text="20% full"
+            android:text="N/A"
             android:textColor="@color/black"
             android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- /// BEST TIME TO GO /// -->
+
+    <LinearLayout
+        android:id="@+id/timetogo_layout"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/occupancy_layout"
+        android:layout_toRightOf="@+id/subzone_pic"
+        android:orientation="horizontal" >
 
         <!-- /// TIME TO GO /// -->
 
         <TextView
-            android:id="@+id/time_to_go"
+            android:id="@+id/subzone_timetogo_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:text="Go now!"
-            android:textColor="@color/green"
+            android:text="Best Time: "
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/subzone_timetogo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="N/A"
+            android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>
 
