@@ -15,5 +15,8 @@ public class Constants {
 	public static final String KEY_PIC = "key_pic";
 	
 	public static final int CHART_DISPLACEMENT = 655;
+	
+	public static final int OCCUPANCY_THRESHOLD_LOW = 50;
+	public static final int OCCUPANCY_THRESHOLD_HIGH = 90;
 
 }

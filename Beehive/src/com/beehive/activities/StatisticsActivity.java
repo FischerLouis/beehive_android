@@ -8,7 +8,6 @@ import org.achartengine.GraphicalView;
 import org.achartengine.chart.BarChart.Type;
 import org.achartengine.chart.PointStyle;
 import org.achartengine.model.CategorySeries;
-import org.achartengine.model.SeriesSelection;
 import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.SimpleSeriesRenderer;
@@ -22,14 +21,19 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.ImageLoader.ImageContainer;
+import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.beehive.R;
 import com.beehive.tools.Constants;
+import com.beehive.tools.VolleySingleton;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
 import android.graphics.drawable.BitmapDrawable;
@@ -37,13 +41,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class StatisticsActivity extends Activity {
 
@@ -51,34 +52,33 @@ public class StatisticsActivity extends Activity {
 	private RequestQueue queue;
 	private int zoneId;
 	private GraphicalView weekChart;
-	//private int curDay;
+	private ImageLoader mImageLoader;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_statistics);
-		//Retrieve data from intent
+		//SET IMAGE LOADER
+		mImageLoader = VolleySingleton.getInstance().getImageLoader();
+		//DATA FROM INTENT
 		Intent intent = getIntent();
 		zoneId = intent.getIntExtra("ID", 0);
 		String title = intent.getStringExtra("TITLE");
 		String subtitle = intent.getStringExtra("SUBTITLE");
 		String occupancy = intent.getStringExtra("OCCUPANCY");
 		String timeToGo = intent.getStringExtra("TIMETOGO");
-
-		Bundle extras = intent.getExtras();
-		Bitmap bm = extras.getParcelable(Constants.KEY_PIC);
-
-		//Retrieve views
+		String urlPic = intent.getStringExtra("URLPIC");
+		// VIEWS
 		TextView titleView = (TextView)findViewById(R.id.title);
 		TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 		TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 		TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
 		ImageView pic = (ImageView)findViewById(R.id.pics);
-		pic.setImageBitmap(bm);
 		hsv = (HorizontalScrollView) findViewById(R.id.hsw);
 		//Setting up data
 		titleView.setText(title);
 		subtitleView.setText(subtitle);
+		setImage(urlPic, pic);
 		if(occupancy != null){
 			occupancyView.setText(occupancy);
 			setColorTitle(titleView, occupancy);
@@ -302,8 +302,9 @@ public class StatisticsActivity extends Activity {
 		renderer.setXAxisMin(0.5);
 		renderer.setXAxisMax(7.5);
 		renderer.setYAxisMin(0);
+		formatYTextLabel(renderer, maxWeek);
 		renderer.setYAxisMax(maxWeek);
-		// TEXT
+		// TEXT LABEL X AND Y
 		renderer.setChartTitle("Average occupancy");
 		renderer.addXTextLabel(1, "Mon.");
 		renderer.addXTextLabel(2, "Tue.");
@@ -343,41 +344,43 @@ public class StatisticsActivity extends Activity {
 		renderer.setXAxisMin(0);
 		renderer.setXAxisMax(nbSamples);
 		renderer.setYAxisMin(minDay);
-		renderer.setYAxisMax(maxDay+20);
+		renderer.setYAxisMax(maxDay);
 		// TEXT
 		renderer.setChartTitle(day);
-		formatXTextLabel2(renderer);
+		formatXTextLabel(renderer);
+		formatYTextLabel(renderer, maxDay);
 		//OTHER
+		renderer.setYLabelsAlign(Align.RIGHT);
 		renderer.setShowGrid(true);
 		renderer.setXLabels(0);
 		renderer.setMargins(new int[] { 40, 50, 0, 0 });
 	}
 
-	private void formatXTextLabel2(XYMultipleSeriesRenderer renderer){
+	private void formatXTextLabel(XYMultipleSeriesRenderer renderer){
 		for(int i=0; i<=95;i++){
 			switch(i){
 			case 0:
 				renderer.addXTextLabel(i, "12am");
 				break;
-			case 12:
+			case 11:
 				renderer.addXTextLabel(i, "3am");
 				break;
-			case 24:
+			case 23:
 				renderer.addXTextLabel(i, "6am");
 				break;
-			case 36:
+			case 35:
 				renderer.addXTextLabel(i, "9am");
 				break;
-			case 48:
+			case 47:
 				renderer.addXTextLabel(i, "12pm");
 				break;
-			case 60:
+			case 59:
 				renderer.addXTextLabel(i, "3pm");
 				break;
-			case 72:
+			case 71:
 				renderer.addXTextLabel(i, "6pm");
 				break;
-			case 84:
+			case 83:
 				renderer.addXTextLabel(i, "9pm");
 				break;
 			default:
@@ -387,14 +390,39 @@ public class StatisticsActivity extends Activity {
 		}
 	}
 
+	private void formatYTextLabel(XYMultipleSeriesRenderer renderer, int maxWeek){
+		renderer.setYLabels(0);
+		int threshold1 = maxWeek/4;
+		int threshold2 = maxWeek/2;
+		int threshold3 = (maxWeek/4)*3;
+		int threshold4 = maxWeek;
+		for(int i=0; i<=maxWeek;i++){
+			if(i == threshold1){
+				renderer.addYTextLabel(i, threshold1+"%", 0);
+			}
+			else if(i == threshold2){
+				renderer.addYTextLabel(i, threshold2+"%", 0);
+			}
+			else if(i == threshold3){
+				renderer.addYTextLabel(i, threshold3+"%", 0);
+			}
+			else if(i == threshold4){
+				renderer.addYTextLabel(i, threshold4+"%", 0);
+			}
+			else{
+				renderer.addYTextLabel(i, "", 0);
+			}
+		}
+	}
+
 	private void setColorTitle(TextView title, String occupancy){
 		int percentageChar = occupancy.indexOf("%");
 		if(percentageChar>0){
 			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < 50){
+			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
 				title.setTextColor(getResources().getColor(R.color.green));
 			}
-			else if(valueOcc < 90){
+			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
 				title.setTextColor(getResources().getColor(R.color.orange));
 			}
 			else{
@@ -403,21 +431,28 @@ public class StatisticsActivity extends Activity {
 		}
 	}
 
-	/*
-	@Override
-	public void onClick(View view) {
-		SeriesSelection seriesSelection = weekChart.getCurrentSeriesAndPoint();  
-		if (seriesSelection != null) {        
-			int idBar = seriesSelection.getPointIndex();
-			int move = idBar-curDay;
-			//if(move > 0)
-				//hsv.scrollBy(Constants.CHART_DISPLACEMENT*(-1)*move, 0);
-			//else
-				hsv.scrollTo(Constants.CHART_DISPLACEMENT*move, 0);
-			Log.v("idbar",""+idBar);
-			Log.v("curDay",""+curDay);
-			Log.v("move",""+move);
-			curDay = idBar;
-		}		
-	}*/
+	private void setImage(String url, ImageView imageView){
+
+		final ImageView view = imageView;
+
+		if(VolleySingleton.getInstance().getRequestQueue().getCache().get(url)!=null){
+			byte[]data = VolleySingleton.getInstance().getRequestQueue().getCache().get(url).data;
+			Bitmap bitmap = BitmapFactory.decodeByteArray(data , 0, data.length);
+			view.setImageBitmap(bitmap);
+		}
+		else{
+			mImageLoader.get(url, new ImageListener() {
+
+				public void onErrorResponse(VolleyError error) {
+					//TODO
+				}
+
+				public void onResponse(ImageContainer response, boolean arg1) {
+					if (response.getBitmap() != null) {
+						view.setImageBitmap(response.getBitmap());                	
+					}
+				}
+			});
+		}
+	}
 }

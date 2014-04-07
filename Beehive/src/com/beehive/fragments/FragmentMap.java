@@ -66,7 +66,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	private HashMap<String,Integer> subZonesList;
 	private ArrayList<Marker> markersZoneList;
 	private ArrayList<Marker> markersSubZoneList;
-	private HashMap<String,Bitmap> picHm;
 
 	public FragmentMap(){
 	}
@@ -141,7 +140,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		subZonesList = new HashMap<String,Integer>();
 		markersZoneList = new ArrayList<Marker>();
 		markersSubZoneList = new ArrayList<Marker>();
-		picHm = new HashMap<String,Bitmap>();
 		//Zone1 Loop
 		for (int i=0;i<json.length();i++){
 			JSONObject curZoneJSONObject = json.getJSONObject(i);
@@ -160,7 +158,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			MarkerOptions curZoneMarkerOptions = new MarkerOptions()
 			.position(new LatLng(curZoneLatitude, curZoneLontitude))
 			.title(curZoneName)
-			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+			.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_orange));
+			//.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 			//marker
 			Marker currentZoneMarker = googleMap.addMarker(curZoneMarkerOptions);
 			markersZoneList.add(currentZoneMarker);
@@ -183,7 +182,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 				MarkerOptions curSubZoneMarkerOptions = new MarkerOptions()
 				.position(new LatLng(curSubZoneLatitude, curSubZoneLontitude))
 				.title(curSubZoneName)
-				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+				.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_orange));
 				//marker
 				Marker currentSubZoneMarker = googleMap.addMarker(curSubZoneMarkerOptions);
 				markersSubZoneList.add(currentSubZoneMarker);
@@ -246,13 +245,11 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			intent.putExtra("ID", id);
 			intent.putExtra("TITLE", markerTitle);
 			intent.putExtra("SUBTITLE", addInfoZoneHm.get(markerTitle).getDescription());
+			intent.putExtra("URLPIC", addInfoZoneHm.get(markerTitle).getUrlPic());
 			if(realTimeInfoZoneHm != null){
 				intent.putExtra("OCCUPANCY",realTimeInfoZoneHm.get(id).getOccupancy());
 				intent.putExtra("TIMETOGO",realTimeInfoZoneHm.get(id).getBestTime());
 			}
-			//IMAGE PARCE
-			Bundle picExtra = new Bundle();
-			picExtra.putParcelable(Constants.KEY_PIC, picHm.get(markerTitle));
 			startActivity(intent);
 		}
 	}
@@ -302,10 +299,10 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		int percentageChar = occupancy.indexOf("%");
 		if(percentageChar>0){
 			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < 50){
+			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
 				title.setTextColor(context.getResources().getColor(R.color.green));
 			}
-			else if(valueOcc < 90){
+			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
 				title.setTextColor(context.getResources().getColor(R.color.orange));
 			}
 			else{

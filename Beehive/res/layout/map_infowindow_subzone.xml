@@ -11,7 +11,7 @@
         android:layout_height="50dp"
         android:layout_centerVertical="true"
         android:layout_marginRight="2dp"
-        android:contentDescription="TODO"
+        android:contentDescription="@string/image_description"
         android:padding="1dp"
         android:src="@drawable/ic_launcher" />
 
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/subzone_pic"
         android:maxLines="1"
-        android:text="SubZone Name"
+        android:text="@string/string_default"
         android:textColor="@color/black"
         android:textSize="16sp" />
 
@@ -40,7 +40,7 @@
         android:layout_below="@+id/subzone_separator"
         android:layout_toRightOf="@+id/subzone_pic"
         android:maxLines="3"
-        android:text="SubZone Name"
+        android:text="@string/string_default"
         android:textColor="@color/black"
         android:textSize="12sp" />
 
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:text="Occupancy: "
+            android:text="@string/occupancy"
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:maxLines="1"
-            android:text="N/A"
+            android:text="@string/string_default"
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:text="Best Time: "
+            android:text="@string/time_to_go"
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -100,7 +100,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:text="N/A"
+            android:text="@string/string_default"
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>

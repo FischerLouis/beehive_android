@@ -13,9 +13,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputType;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -244,10 +242,10 @@ public class ShareActivity extends Activity implements OnTouchListener {
 		int percentageChar = occupancy.indexOf("%");
 		if(percentageChar>0){
 			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < 50){
+			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
 				title.setTextColor(getResources().getColor(R.color.green));
 			}
-			else if(valueOcc < 90){
+			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
 				title.setTextColor(getResources().getColor(R.color.orange));
 			}
 			else{

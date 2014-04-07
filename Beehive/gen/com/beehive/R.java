@@ -240,6 +240,10 @@ containing a value of this type.
         public static final int ic_plusone_standard_off_client=0x7f02001e;
         public static final int ic_plusone_tall_off_client=0x7f02001f;
         public static final int location_background=0x7f020020;
+        public static final int pin_blue=0x7f020021;
+        public static final int pin_green=0x7f020022;
+        public static final int pin_orange=0x7f020023;
+        public static final int pin_red=0x7f020024;
     }
     public static final class id {
         public static final int action_refresh=0x7f050041;
@@ -335,9 +339,9 @@ containing a value of this type.
         public static final int main=0x7f0a0002;
     }
     public static final class string {
-        public static final int action_search=0x7f060022;
-        public static final int action_settings=0x7f06001e;
-        public static final int app_name=0x7f06001d;
+        public static final int action_search=0x7f060025;
+        public static final int action_settings=0x7f060021;
+        public static final int app_name=0x7f060020;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
          */
@@ -433,37 +437,42 @@ containing a value of this type.
          */
         public static final int common_signin_button_text_long=0x7f060013;
         public static final int debug_key=0x7f06001c;
-        public static final int footer=0x7f060021;
-        public static final int id_tag_key=0x7f06002b;
+        public static final int footer=0x7f060024;
+        public static final int id_tag_key=0x7f06001d;
+        public static final int image_description=0x7f06003f;
         /**  Location client code resources (prefix with location_client) 
          */
         public static final int location_client_powered_by_google=0x7f06001a;
-        public static final int no_items=0x7f06002a;
-        public static final int queue1=0x7f060035;
-        public static final int queue2=0x7f060036;
-        public static final int queue3=0x7f060037;
-        public static final int queue4=0x7f060038;
-        public static final int queue_footer=0x7f06003a;
-        public static final int queue_question=0x7f060039;
-        public static final int refresh_title=0x7f060024;
+        public static final int no_items=0x7f06002d;
+        public static final int occupancy=0x7f06003c;
+        public static final int queue1=0x7f060036;
+        public static final int queue2=0x7f060037;
+        public static final int queue3=0x7f060038;
+        public static final int queue4=0x7f060039;
+        public static final int queue_footer=0x7f06003b;
+        public static final int queue_question=0x7f06003a;
+        public static final int refresh_title=0x7f060027;
         public static final int release_key=0x7f06001b;
-        public static final int search_hint=0x7f060029;
-        public static final int search_title=0x7f060023;
-        public static final int share_title=0x7f060025;
-        public static final int subzone_tag_key=0x7f06002c;
-        public static final int time_ampm_default=0x7f060034;
-        public static final int time_hour_default=0x7f060031;
-        public static final int time_minutes_default=0x7f060033;
-        public static final int time_separator=0x7f060032;
-        public static final int title_activity_share=0x7f060027;
-        public static final int title_activity_statistics=0x7f060026;
-        public static final int title_day=0x7f06002e;
-        public static final int title_options=0x7f060028;
-        public static final int title_queue=0x7f060030;
-        public static final int title_section1=0x7f06001f;
-        public static final int title_section2=0x7f060020;
-        public static final int title_time=0x7f06002f;
-        public static final int title_week=0x7f06002d;
+        public static final int search_hint=0x7f06002c;
+        public static final int search_title=0x7f060026;
+        public static final int share_title=0x7f060028;
+        public static final int string_default=0x7f06003e;
+        public static final int subzone_tag_key=0x7f06001e;
+        public static final int time_ampm_default=0x7f060035;
+        public static final int time_hour_default=0x7f060032;
+        public static final int time_minutes_default=0x7f060034;
+        public static final int time_separator=0x7f060033;
+        public static final int time_to_go=0x7f06003d;
+        public static final int title_activity_share=0x7f06002a;
+        public static final int title_activity_statistics=0x7f060029;
+        public static final int title_day=0x7f06002f;
+        public static final int title_options=0x7f06002b;
+        public static final int title_queue=0x7f060031;
+        public static final int title_section1=0x7f060022;
+        public static final int title_section2=0x7f060023;
+        public static final int title_time=0x7f060030;
+        public static final int title_week=0x7f06002e;
+        public static final int urlpic_tag_key=0x7f06001f;
     }
     public static final class style {
         /** 

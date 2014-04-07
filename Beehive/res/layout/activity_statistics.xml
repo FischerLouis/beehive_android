@@ -14,130 +14,148 @@
         android:layout_height="1dp"
         android:layout_below="@+id/header"
         android:background="@color/black" />
-    <!-- WEEK TITLE -->
-
-    <RelativeLayout
-        android:id="@+id/title_week_layout"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_below="@+id/separator"
-        android:background="@color/orange"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/title_week"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="4dp"
-            android:text="@string/title_week"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="1dp"
-            android:background="@color/white" />
-    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/title_week_layout"
+        android:weightSum="2"
+        android:layout_below="@+id/separator"
         android:orientation="vertical" >
 
+        <!-- LAYOUT WEEKLY -->
+
         <LinearLayout
-            android:id="@+id/average_week_chart"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:orientation="vertical" />
-
-        <!-- DAY TITLE -->
-
-        <RelativeLayout
-            android:id="@+id/title_day_layout"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:background="@color/orange"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/title_day"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="4dp"
-                android:text="@string/title_day"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+            <!-- WEEK TITLE -->
 
-            <View
+            <RelativeLayout
+                android:id="@+id/title_week_layout"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginBottom="1dp"
-                android:background="@color/white" />
-        </RelativeLayout>
+                android:layout_height="30dp"
+                android:background="@color/orange"
+                android:orientation="vertical" >
 
-        <HorizontalScrollView
-            android:id="@+id/hsw"
-            android:layout_width="wrap_content"
-            android:layout_height="200dp"
-            android:fillViewport="true" >
+                <TextView
+                    android:id="@+id/title_week"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/title_week"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="1dp"
+                    android:background="@color/white" />
+            </RelativeLayout>
 
             <LinearLayout
-                android:id="@+id/inner_layout"
+                android:id="@+id/average_week_chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <!-- LAYOUT DAILY -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <!-- DAY TITLE -->
+
+            <RelativeLayout
+                android:id="@+id/title_day_layout"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="@color/orange"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/title_day"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/title_day"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="1dp"
+                    android:background="@color/white" />
+            </RelativeLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/hsw"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal" >
+                android:layout_height="match_parent"
+                android:fillViewport="true" >
 
                 <LinearLayout
-                    android:id="@+id/mon_chart"
-                    android:layout_width="330dp"
+                    android:id="@+id/inner_layout"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
 
-                <LinearLayout
-                    android:id="@+id/tue_chart"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-                
-                <LinearLayout
-                    android:id="@+id/wed_chart"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-                
-                <LinearLayout
-                    android:id="@+id/thu_chart"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-                
-                <LinearLayout
-                    android:id="@+id/fri_chart"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-                
-                <LinearLayout
-                    android:id="@+id/sat_chart"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-                
-                <LinearLayout
-                    android:id="@+id/sun_chart"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />                
-                
-            </LinearLayout>
-        </HorizontalScrollView>
+                    <LinearLayout
+                        android:id="@+id/mon_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:id="@+id/tue_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:id="@+id/wed_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:id="@+id/thu_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:id="@+id/fri_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:id="@+id/sat_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:id="@+id/sun_chart"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

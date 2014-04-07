@@ -1,4 +1,4 @@
-package come.beehive.application;
+package com.beehive.application;
 
 
 import android.app.Application;

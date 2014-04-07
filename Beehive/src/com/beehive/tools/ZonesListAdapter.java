@@ -12,7 +12,6 @@ import com.beehive.objects.Zone;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +57,10 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 			description.setText(curZone.getDescription());
 			occupancy.setText(curZone.getOccupancy());
 			timeToGo.setText(curZone.getTimeToGo());
+			// TAG ID ZONE
 			rowView.setTag(R.string.id_tag_key, viewId);
+			// TAG URL PIC
+			rowView.setTag(R.string.urlpic_tag_key, curZone.getUrlPic());
 			// IMAGE FROM CACHE IF EXISTING
 			setImage(curZone.getUrlPic(), subZonePic);
 			// TITLE ACCORDING TO THE OCCUPANCY
@@ -71,10 +73,10 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 		int percentageChar = occupancy.indexOf("%");
 		if(percentageChar>0){
 			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < 50){
+			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
 				title.setTextColor(context.getResources().getColor(R.color.green));
 			}
-			else if(valueOcc < 90){
+			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
 				title.setTextColor(context.getResources().getColor(R.color.orange));
 			}
 			else{
@@ -88,13 +90,11 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 		final ImageView view = imageView;
 
 		if(VolleySingleton.getInstance().getRequestQueue().getCache().get(url)!=null){
-			Log.v("LIST REQUEST","CACHE");
 			byte[]data = VolleySingleton.getInstance().getRequestQueue().getCache().get(url).data;
 			Bitmap bitmap = BitmapFactory.decodeByteArray(data , 0, data.length);
 			view.setImageBitmap(bitmap);
 		}
 		else{
-			Log.v("LIST REQUEST","NO CACHE");
 			mImageLoader.get(url, new ImageListener() {
 
 				public void onErrorResponse(VolleyError error) {

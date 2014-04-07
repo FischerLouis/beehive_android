@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import com.beehive.activities.MainActivity;
 import com.beehive.activities.StatisticsActivity;
 import com.beehive.objects.Zone;
-import com.beehive.tools.Constants;
 import com.beehive.tools.FragmentListCommunicator;
 import com.beehive.tools.ZonesListAdapter;
 import com.beehive.R;
@@ -17,8 +16,6 @@ import com.beehive.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -26,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -142,25 +138,20 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			TextView subtitleView = (TextView)view.findViewById(R.id.subtitle);
 			TextView occupancyView = (TextView)view.findViewById(R.id.occupancy);
 			TextView timeToGoView = (TextView)view.findViewById(R.id.time_to_go);
-			//IMAGE PARCE
-			ImageView pic = (ImageView)view.findViewById(R.id.pics);
-			BitmapDrawable bmDrawable = ((BitmapDrawable) pic.getDrawable());
-			Bitmap picBm = bmDrawable .getBitmap();
-			Bundle picExtra = new Bundle();
-			picExtra.putParcelable(Constants.KEY_PIC, picBm);
 			//SET VAR			
 			String title = titleView.getText().toString();
 			String subtitle = subtitleView.getText().toString();
 			String occupancy = occupancyView.getText().toString();
 			String timeToGo = timeToGoView.getText().toString();
 			int idView = (Integer) view.getTag(R.string.id_tag_key);
+			String urlPic = (String) view.getTag(R.string.urlpic_tag_key);
 			//PUT VALUES
 			intent.putExtra("ID", idView);
 			intent.putExtra("TITLE", title);
 			intent.putExtra("SUBTITLE", subtitle);
 			intent.putExtra("OCCUPANCY", occupancy);
 			intent.putExtra("TIMETOGO", timeToGo);
-			intent.putExtras(picExtra);
+			intent.putExtra("URLPIC", urlPic);
 			startActivity(intent);
 		}
 	}

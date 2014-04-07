@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical" >
 
     <include
@@ -15,162 +15,191 @@
         android:layout_below="@+id/header"
         android:background="@color/black" />
 
-    <!-- TIME TITLE -->
-
-    <RelativeLayout
-        android:id="@+id/title_week_layout"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_below="@+id/separator"
-        android:background="@color/orange"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/title_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="4dp"
-            android:text="@string/title_time"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="1dp"
-            android:background="@color/white" />
-    </RelativeLayout>
-
-    <!-- TIME -->
-
     <LinearLayout
-        android:id="@+id/time_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/title_week_layout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/time_hour"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/time_hour_default"
-            android:textColor="@color/orange"
-            android:textSize="70sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/time_separator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/time_separator"
-            android:textColor="@color/orange"
-            android:textSize="70sp" />
-
-        <TextView
-            android:id="@+id/time_minutes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/time_minutes_default"
-            android:textColor="@color/orange"
-            android:textSize="70sp" />
-
-        <TextView
-            android:id="@+id/time_ampm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/time_ampm_default"
-            android:textColor="@color/orange"
-            android:textSize="30sp" />
-    </LinearLayout>
-
-    <!-- QUEUE TITLE -->
-
-    <RelativeLayout
-        android:id="@+id/queue_layout"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_below="@+id/time_layout"
-        android:background="@color/orange"
-        android:orientation="vertical" >
+        android:layout_height="match_parent"
+        android:layout_below="@+id/separator"
+        android:orientation="vertical"
+        android:paddingBottom="45dp"
+        android:weightSum="1" >
 
-        <TextView
-            android:id="@+id/title_queue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="4dp"
-            android:text="@string/title_queue"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+        <!-- LAYOUT TIME -->
 
-        <View
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="1dp"
-            android:background="@color/white" />
-    </RelativeLayout>
+            android:layout_height="0dp"
+            android:layout_weight="0.3"
+            android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/queue_question"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/queue_layout"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="10dp"
-        android:text="@string/queue_question"
-        android:textColor="@color/orange"
-        android:textSize="25sp" />
+            <!-- TIME TITLE -->
 
-    <RadioGroup
-        android:id="@+id/radio_queue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/queue_question"
-        android:layout_centerHorizontal="true" >
+            <RelativeLayout
+                android:id="@+id/title_week_layout"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="@color/orange"
+                android:orientation="vertical" >
 
-        <RadioButton
-            android:id="@+id/queue1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/queue1"
-            android:textSize="25sp" />
+                <TextView
+                    android:id="@+id/title_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/title_time"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
 
-        <RadioButton
-            android:id="@+id/queue2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/queue2"
-            android:textSize="25sp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="1dp"
+                    android:background="@color/white" />
+            </RelativeLayout>
 
-        <RadioButton
-            android:id="@+id/queue3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/queue3"
-            android:textSize="25sp" />
+            <!-- TIME -->
 
-        <RadioButton
-            android:id="@+id/queue4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/queue4"
-            android:textSize="25sp" />
-    </RadioGroup>
+            <LinearLayout
+                android:id="@+id/time_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/time_hour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time_hour_default"
+                    android:textColor="@color/orange"
+                    android:textSize="70sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/time_separator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time_separator"
+                    android:textColor="@color/orange"
+                    android:textSize="70sp" />
+
+                <TextView
+                    android:id="@+id/time_minutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time_minutes_default"
+                    android:textColor="@color/orange"
+                    android:textSize="70sp" />
+
+                <TextView
+                    android:id="@+id/time_ampm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time_ampm_default"
+                    android:textColor="@color/orange"
+                    android:textSize="30sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- LAYOUT QUEUE -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7"
+            android:orientation="vertical" >
+
+            <!-- QUEUE TITLE -->
+
+            <RelativeLayout
+                android:id="@+id/queue_layout"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="@color/orange"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/title_queue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/title_queue"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="1dp"
+                    android:background="@color/white" />
+            </RelativeLayout>
+
+            <!-- QUESTION AND RADIO BUTTONS -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/queue_question"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="30dp"
+                    android:text="@string/queue_question"
+                    android:textColor="@color/orange"
+                    android:textSize="25sp" />
+
+                <RadioGroup
+                    android:id="@+id/radio_queue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" >
+
+                    <RadioButton
+                        android:id="@+id/queue1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/queue1"
+                        android:textSize="25sp" />
+
+                    <RadioButton
+                        android:id="@+id/queue2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/queue2"
+                        android:textSize="25sp" />
+
+                    <RadioButton
+                        android:id="@+id/queue3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/queue3"
+                        android:textSize="25sp" />
+
+                    <RadioButton
+                        android:id="@+id/queue4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/queue4"
+                        android:textSize="25sp" />
+                </RadioGroup>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- SEND -->
 
     <LinearLayout
         android:id="@+id/footer_queue"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@color/black"
@@ -182,7 +211,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="6dip"
-            android:contentDescription="TODO"
+            android:contentDescription="@string/image_description"
             android:src="@drawable/ic_launcher" />
 
         <TextView

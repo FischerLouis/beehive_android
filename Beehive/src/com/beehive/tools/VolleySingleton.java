@@ -2,12 +2,11 @@ package com.beehive.tools;
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
-import come.beehive.application.BeehiveApplication;
+import com.beehive.application.BeehiveApplication;
  
 public class VolleySingleton {
 	
