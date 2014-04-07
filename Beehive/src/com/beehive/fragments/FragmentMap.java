@@ -11,9 +11,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLoader.ImageContainer;
+import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.beehive.R;
 import com.beehive.activities.MainActivity;
 import com.beehive.activities.StatisticsActivity;
@@ -28,6 +33,7 @@ import com.beehive.objects.AddInfoZone;
 import com.beehive.objects.RealTimeInfoZone;
 import com.beehive.tools.Constants;
 import com.beehive.tools.FragmentMapCommunicator;
+import com.beehive.tools.VolleySingleton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
@@ -40,15 +46,14 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Picasso.LoadedFrom;
-import com.squareup.picasso.Target;
 
 public class FragmentMap extends Fragment implements FragmentMapCommunicator, OnInfoWindowClickListener, InfoWindowAdapter, OnCameraChangeListener {
 
 	private Context context;
 	private Activity activity;
 	private static View view;
+
+	private ImageLoader mImageLoader;
 	// Google Map
 	private GoogleMap googleMap;
 	//Initialize the zoom value
@@ -62,7 +67,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	private ArrayList<Marker> markersZoneList;
 	private ArrayList<Marker> markersSubZoneList;
 	private HashMap<String,Bitmap> picHm;
-	
+
 	public FragmentMap(){
 	}
 	public static FragmentMap newInstance(){
@@ -75,6 +80,13 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		context = getActivity();
 		this.activity = activity;
 		((MainActivity)context).fragmentMapCommunicator = this;
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		//mImageLoader = ImageLoaderProvider.getImageLoader(context, VolleyProvider.getQueue(context));
+		mImageLoader = VolleySingleton.getInstance().getImageLoader();
 	}
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -90,7 +102,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		}
 		setRetainInstance(true);
 		initMap();
-		picHm = new HashMap<String,Bitmap>();
 		return view;
 	}
 
@@ -130,16 +141,19 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		subZonesList = new HashMap<String,Integer>();
 		markersZoneList = new ArrayList<Marker>();
 		markersSubZoneList = new ArrayList<Marker>();
+		picHm = new HashMap<String,Bitmap>();
 		//Zone1 Loop
 		for (int i=0;i<json.length();i++){
 			JSONObject curZoneJSONObject = json.getJSONObject(i);
 			//Get Attributs
 			int curZoneId = curZoneJSONObject.getInt("id");
-			String curZoneName = curZoneJSONObject.getString("name");
+			final String curZoneName = curZoneJSONObject.getString("name");
 			Double curZoneLatitude = curZoneJSONObject.getDouble("latitude");
 			Double curZoneLontitude = curZoneJSONObject.getDouble("longitude");
 			String curZoneDescription = curZoneJSONObject.getString("description");
 			String curZoneUrlPic = curZoneJSONObject.getString("url_photo");
+			//CACHE IMAGE
+			cacheImage(curZoneUrlPic);
 			//MarkerList
 			MapsInitializer.initialize(activity);
 			//options
@@ -162,6 +176,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 				Double curSubZoneLontitude = curSubZoneJSONObject.getDouble("longitude");
 				String curSubZoneDescription = curSubZoneJSONObject.getString("description");
 				String curSubZoneUrlPic = curSubZoneJSONObject.getString("url_photo");
+				//CACHE IMAGE
+				cacheImage(curSubZoneUrlPic);
 				//MarkerList
 				//options
 				MarkerOptions curSubZoneMarkerOptions = new MarkerOptions()
@@ -251,25 +267,12 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			view = getActivity().getLayoutInflater().inflate(R.layout.map_infowindow_zone, null);
 			TextView zoneName = (TextView)view.findViewById(R.id.zone_name);
 			TextView zoneDescription = (TextView)view.findViewById(R.id.zone_description);
-			final ImageView zonePic = (ImageView)view.findViewById(R.id.zone_pic);
+			ImageView zonePic = (ImageView)view.findViewById(R.id.zone_pic);
 			AddInfoZone info = addInfoZoneHm.get(markerTitle);
 			zoneName.setText(markerTitle);
 			zoneDescription.setText(info.getDescription());
-
-			String urlZonePic = info.getUrlPic();
-			Target target = new Target() {
-				@Override
-				public void onBitmapFailed(Drawable arg0) {
-				}
-				@Override
-				public void onBitmapLoaded(Bitmap bmp, LoadedFrom from) {
-					zonePic.setImageBitmap(bmp);	
-				}
-				@Override
-				public void onPrepareLoad(Drawable arg0) {
-				}
-			};
-			Picasso.with(getActivity()).load(urlZonePic).into(target);
+			//IMAGE FROM CACHE
+			setImageFromCache(info.getUrlPic(), zonePic);
 		}
 		//InfoWindow for SubZone
 		else{
@@ -278,32 +281,37 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			TextView subZoneDescription = (TextView)view.findViewById(R.id.subzone_description);
 			TextView zubZoneOccupancy = (TextView)view.findViewById(R.id.subzone_occupancy);
 			TextView zubZoneTimeToGo = (TextView)view.findViewById(R.id.subzone_timetogo);
-			final ImageView subZonePic = (ImageView)view.findViewById(R.id.subzone_pic);
+			ImageView subZonePic = (ImageView)view.findViewById(R.id.subzone_pic);
 			AddInfoZone info = addInfoZoneHm.get(markerTitle);
 			subZoneName.setText(markerTitle);
 			subZoneDescription.setText(info.getDescription());
+			// SET FROM CACHE
+			setImageFromCache(info.getUrlPic(), subZonePic);
+			// REAL TIME INFO
 			if(realTimeInfoZoneHm != null){
 				RealTimeInfoZone realTimeInfo = realTimeInfoZoneHm.get(info.getId());
 				zubZoneOccupancy.setText(realTimeInfo.getOccupancy());
 				zubZoneTimeToGo.setText(realTimeInfo.getBestTime());
+				setColorTitle(subZoneName, realTimeInfo.getOccupancy());
 			}			
-			String urlSubZonePic = info.getUrlPic();
-			Target target = new Target() {
-				@Override
-				public void onBitmapFailed(Drawable arg0) {
-				}
-				@Override
-				public void onBitmapLoaded(Bitmap bmp, LoadedFrom from) {
-					subZonePic.setImageBitmap(bmp);	
-					picHm.put(markerTitle, bmp);
-				}
-				@Override
-				public void onPrepareLoad(Drawable arg0) {
-				}
-			};
-			Picasso.with(getActivity()).load(urlSubZonePic).into(target);
 		}
 		return view;
+	}
+
+	private void setColorTitle(TextView title, String occupancy){
+		int percentageChar = occupancy.indexOf("%");
+		if(percentageChar>0){
+			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
+			if(valueOcc < 50){
+				title.setTextColor(context.getResources().getColor(R.color.green));
+			}
+			else if(valueOcc < 90){
+				title.setTextColor(context.getResources().getColor(R.color.orange));
+			}
+			else{
+				title.setTextColor(context.getResources().getColor(R.color.red));
+			}
+		}
 	}
 
 	@Override
@@ -345,6 +353,32 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		for(int j=0;j<markersSubZoneList.size();j++){
 			markersSubZoneList.get(j).setVisible(false);
 		}
+	}
+
+	private void cacheImage(String url){	
+		mImageLoader.get(url, new ImageListener() {
+
+			public void onErrorResponse(VolleyError error) {
+				//TODO
+			}
+
+			public void onResponse(ImageContainer response, boolean arg1) {
+				if (response.getBitmap() != null) {
+					//TODO	                	
+				}
+			}
+		});
+	}
+
+	private void setImageFromCache(String url, ImageView view){
+		if(VolleySingleton.getInstance().getRequestQueue().getCache().get(url)!=null){
+			byte[]data = VolleySingleton.getInstance().getRequestQueue().getCache().get(url).data;
+			Bitmap bitmap = BitmapFactory.decodeByteArray(data , 0, data.length);
+			view.setImageBitmap(bitmap);
+		}
+		else
+			//TODO ImageView FAIL
+			Log.v("XX","FAIL");
 	}
 
 	@Override

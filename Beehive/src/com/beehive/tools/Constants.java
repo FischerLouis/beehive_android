@@ -13,5 +13,7 @@ public class Constants {
 	public static final String URL_DYNAMIC_DAILY = "http://api.letsbeehive.tk/dynamic/daily/";
 	
 	public static final String KEY_PIC = "key_pic";
+	
+	public static final int CHART_DISPLACEMENT = 655;
 
 }

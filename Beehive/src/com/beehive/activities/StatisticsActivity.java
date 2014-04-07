@@ -8,6 +8,7 @@ import org.achartengine.GraphicalView;
 import org.achartengine.chart.BarChart.Type;
 import org.achartengine.chart.PointStyle;
 import org.achartengine.model.CategorySeries;
+import org.achartengine.model.SeriesSelection;
 import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.SimpleSeriesRenderer;
@@ -31,7 +32,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.HorizontalScrollView;
@@ -40,11 +45,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class StatisticsActivity extends Activity implements OnClickListener {
+public class StatisticsActivity extends Activity {
 
 	private HorizontalScrollView hsv;
 	private RequestQueue queue;
 	private int zoneId;
+	private GraphicalView weekChart;
+	//private int curDay;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +64,10 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 		String subtitle = intent.getStringExtra("SUBTITLE");
 		String occupancy = intent.getStringExtra("OCCUPANCY");
 		String timeToGo = intent.getStringExtra("TIMETOGO");
-		
+
 		Bundle extras = intent.getExtras();
 		Bitmap bm = extras.getParcelable(Constants.KEY_PIC);
-		
-		
+
 		//Retrieve views
 		TextView titleView = (TextView)findViewById(R.id.title);
 		TextView subtitleView = (TextView)findViewById(R.id.subtitle);
@@ -73,8 +79,10 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 		//Setting up data
 		titleView.setText(title);
 		subtitleView.setText(subtitle);
-		if(occupancy != null)
+		if(occupancy != null){
 			occupancyView.setText(occupancy);
+			setColorTitle(titleView, occupancy);
+		}
 		if(timeToGo != null)
 			timeToGoView.setText(timeToGo);
 	}
@@ -88,6 +96,53 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activity_statistics_actions, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int itemId = item.getItemId();
+		switch(itemId){
+		case R.id.action_share:
+			Intent intent = new Intent(this, ShareActivity.class);
+			// VIEW RETRIEVING
+			TextView titleView = (TextView)findViewById(R.id.title);
+			TextView subtitleView = (TextView)findViewById(R.id.subtitle);
+			TextView occupancyView = (TextView)findViewById(R.id.occupancy);
+			TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
+			//IMAGE PARCE
+			ImageView pic = (ImageView)findViewById(R.id.pics);
+			BitmapDrawable bmDrawable = ((BitmapDrawable) pic.getDrawable());
+			Bitmap picBm = bmDrawable .getBitmap();
+			Bundle picExtra = new Bundle();
+			picExtra.putParcelable(Constants.KEY_PIC, picBm);
+			//SET VAR			
+			String title = titleView.getText().toString();
+			String subtitle = subtitleView.getText().toString();
+			String occupancy = occupancyView.getText().toString();
+			String timeToGo = timeToGoView.getText().toString();
+			//PUT VALUES
+			intent.putExtra("ID", zoneId);
+			intent.putExtra("TITLE", title);
+			intent.putExtra("SUBTITLE", subtitle);
+			intent.putExtra("OCCUPANCY", occupancy);
+			intent.putExtra("TIMETOGO", timeToGo);
+			intent.putExtras(picExtra);	
+			startActivity(intent);
+			break;
+		case android.R.id.home:
+			finish();
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
+
+	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if(hasFocus){
@@ -95,13 +150,9 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(now);
 			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)-2;
-			hsv.scrollTo(655*(dayOfWeek), 0);
+			//curDay = dayOfWeek;
+			hsv.scrollTo(Constants.CHART_DISPLACEMENT*(dayOfWeek), 0);
 		}
-	}
-
-	@Override
-	public void onClick(View view) {
-		Toast.makeText(this, "Coming soon ...", Toast.LENGTH_SHORT).show();
 	}
 
 	private void requestChartData(){
@@ -131,7 +182,7 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 	private void buildCharts(JSONArray json) throws JSONException{
 		//INIT WEEK DATA
 		XYMultipleSeriesDataset weekDataSet = new XYMultipleSeriesDataset();
-		CategorySeries weekSeries = new CategorySeries("Average number of people per day");
+		CategorySeries weekSeries = new CategorySeries("Average occupancy");
 		int maxWeek = 0;
 		// INIT X VALUES
 		int X[] = new int[96];
@@ -183,9 +234,10 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 		// WEEK CHART
 		XYMultipleSeriesRenderer barRenderer = getBarRenderer();
 		barChartSettings(barRenderer, maxWeek);
-		GraphicalView weekChart = ChartFactory.getBarChartView(this, weekDataSet, barRenderer, Type.DEFAULT);
+		weekChart = ChartFactory.getBarChartView(this, weekDataSet, barRenderer, Type.DEFAULT);
+		//weekChart.setOnClickListener(this);
 		LinearLayout weekLayout = (LinearLayout) findViewById(R.id.average_week_chart);
-		weekLayout.addView(weekChart);
+		weekLayout.addView(weekChart);	
 	}
 
 	private LinearLayout getLayoutFromId(int id){
@@ -213,6 +265,8 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 		SimpleSeriesRenderer r = new SimpleSeriesRenderer();
 		r.setColor(getResources().getColor(R.color.orange));
 		renderer.addSeriesRenderer(r);
+		renderer.setClickEnabled(true);
+		//renderer.setSelectableBuffer(10);
 		return renderer;
 	}
 
@@ -230,7 +284,7 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 	private void barChartSettings(XYMultipleSeriesRenderer renderer, int maxWeek){
 		// SIZE
 		renderer.setAxisTitleTextSize(20);
-		renderer.setChartTitleTextSize(20);
+		renderer.setChartTitleTextSize(30);
 		renderer.setLabelsTextSize(20);
 		// INTERACTION
 		renderer.setZoomEnabled(false, false);
@@ -250,7 +304,7 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 		renderer.setYAxisMin(0);
 		renderer.setYAxisMax(maxWeek);
 		// TEXT
-		renderer.setChartTitle("Average number of people");
+		renderer.setChartTitle("Average occupancy");
 		renderer.addXTextLabel(1, "Mon.");
 		renderer.addXTextLabel(2, "Tue.");
 		renderer.addXTextLabel(3, "Wes.");
@@ -270,7 +324,7 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 	private void lineChartSettings(XYMultipleSeriesRenderer renderer, String day, int nbSamples, int minDay, int maxDay){
 		// SIZE
 		renderer.setAxisTitleTextSize(20);
-		renderer.setChartTitleTextSize(20);
+		renderer.setChartTitleTextSize(30);
 		renderer.setLabelsTextSize(20);
 		// INTERACTION
 		renderer.setInScroll(true);
@@ -332,4 +386,38 @@ public class StatisticsActivity extends Activity implements OnClickListener {
 			}
 		}
 	}
+
+	private void setColorTitle(TextView title, String occupancy){
+		int percentageChar = occupancy.indexOf("%");
+		if(percentageChar>0){
+			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
+			if(valueOcc < 50){
+				title.setTextColor(getResources().getColor(R.color.green));
+			}
+			else if(valueOcc < 90){
+				title.setTextColor(getResources().getColor(R.color.orange));
+			}
+			else{
+				title.setTextColor(getResources().getColor(R.color.red));
+			}
+		}
+	}
+
+	/*
+	@Override
+	public void onClick(View view) {
+		SeriesSelection seriesSelection = weekChart.getCurrentSeriesAndPoint();  
+		if (seriesSelection != null) {        
+			int idBar = seriesSelection.getPointIndex();
+			int move = idBar-curDay;
+			//if(move > 0)
+				//hsv.scrollBy(Constants.CHART_DISPLACEMENT*(-1)*move, 0);
+			//else
+				hsv.scrollTo(Constants.CHART_DISPLACEMENT*move, 0);
+			Log.v("idbar",""+idBar);
+			Log.v("curDay",""+curDay);
+			Log.v("move",""+move);
+			curDay = idBar;
+		}		
+	}*/
 }

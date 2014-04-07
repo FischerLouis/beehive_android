@@ -16,7 +16,7 @@ import com.beehive.fragments.FragmentMap;
 import com.beehive.tools.Constants;
 import com.beehive.tools.FragmentListCommunicator;
 import com.beehive.tools.FragmentMapCommunicator;
-import com.beehive.tools.StaticDataDownloader;
+import com.beehive.tools.VolleySingleton;
 import com.beehive.R;
 
 import android.app.ActionBar;
@@ -35,6 +35,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -61,13 +62,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	TabListener tabListener = this;
 	Context context = this;
 
-	StaticDataDownloader staticDataloader;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
+		//INIT QUEUE
+		queue = VolleySingleton.getInstance().getRequestQueue();
+		
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -111,7 +113,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			viewPager.setCurrentItem(prefs.getInt("curTabId", 0));
 		}
 		// Init Requests Queue
-		queue = Volley.newRequestQueue(this);
+		// queue = Volley.newRequestQueue(this);
 		// REQUESTS DATA (STATIC & REALTIME)
 		dataRequest();
 	}
@@ -205,6 +207,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		this.optionsMenu = menu;
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main_actions, menu);
+				
 		// Associate searchable configuration with the SearchView
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
