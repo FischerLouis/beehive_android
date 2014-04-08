@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FragmentList extends ListFragment implements FragmentListCommunicator, OnItemClickListener {
 
@@ -155,7 +157,7 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			startActivity(intent);
 		}
 	}
-	
+
 	@Override
 	public void passStaticData(JSONArray json) {
 		try {
@@ -171,6 +173,55 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}	
+	}
+	@Override
+	public void passQueryTextChange(String query) {
+		
+		adapter.getFilter().filter(query);
+		
+		/*
+		boolean addSubZone = false;
+		boolean zoneAdded = false;
+		Zone curZoneSaved = null;
+		//NEW RESULT
+		ArrayList<Zone> searchList = new ArrayList<Zone>();
+		//FINDING MATCHING ZONE
+		for(int i=0;i<zonesList.size();i++){
+			Log.v("XXXXXX",zonesList.get(i).getName());
+			// ZONE
+			if(!zonesList.get(i).isSubZone()){
+				Zone curZone = zonesList.get(i);
+				addSubZone = false;
+				zoneAdded = false;
+				if(curZone.getName().equals(query)){
+					searchList.add(curZone);
+					addSubZone = true;
+				}
+				else{
+					curZoneSaved = curZone;
+				}
+			}
+			// SUB ZONE
+			else{
+				Zone curSubZone = zonesList.get(i);
+				if(addSubZone){
+					searchList.add(curSubZone);
+				}
+				else{
+					if(curSubZone.getName().equals(query)){
+						if(zoneAdded){
+							searchList.add(curSubZone);
+						}
+						else{
+							searchList.add(curZoneSaved);
+							searchList.add(curSubZone);
+							zoneAdded = true;
+						}
+					}
+				}
+
+			}
+		}*/
 	}
 
 }

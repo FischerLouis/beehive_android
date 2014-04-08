@@ -1,10 +1,20 @@
 package com.beehive.activities;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.beehive.R;
 import com.beehive.tools.Constants;
+import com.beehive.tools.VolleySingleton;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,10 +32,12 @@ import android.view.View.OnTouchListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ShareActivity extends Activity implements OnTouchListener {
+public class ShareActivity extends Activity implements OnTouchListener, OnCheckedChangeListener {
 
 	private int zoneId;
 	private String title;
@@ -35,7 +48,11 @@ public class ShareActivity extends Activity implements OnTouchListener {
 	private TextView hourView;
 	private TextView minuteView;
 	private TextView ampmView;
+	private RadioGroup radioGroup;
+	private int contribution = 0;
+	private Timestamp time = null;
 	private Activity activity = this;
+	private Calendar calendar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +78,7 @@ public class ShareActivity extends Activity implements OnTouchListener {
 		hourView = (TextView)findViewById(R.id.time_hour);
 		minuteView = (TextView)findViewById(R.id.time_minutes);
 		ampmView = (TextView)findViewById(R.id.time_ampm);
+		radioGroup = (RadioGroup) findViewById(R.id.radio_queue);
 		pic.setImageBitmap(bm);
 		//Setting up data
 		titleView.setText(title);
@@ -76,7 +94,12 @@ public class ShareActivity extends Activity implements OnTouchListener {
 		hourView.setOnTouchListener(this);
 		minuteView.setOnTouchListener(this);
 		ampmView.setOnTouchListener(this);
-		//TIME
+		radioGroup.setOnCheckedChangeListener(this);
+		//INIT TIME
+		Date now = new Date();
+		calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		//SET TIME VIEW
 		setTime();
 	}
 
@@ -110,10 +133,6 @@ public class ShareActivity extends Activity implements OnTouchListener {
 	}
 
 	private void setTime(){
-		//INIT CALENDAR
-		Date now = new Date();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(now);
 		//GET TIME
 		int hour = calendar.get(Calendar.HOUR);
 		int minute = calendar.get(Calendar.MINUTE);
@@ -127,11 +146,28 @@ public class ShareActivity extends Activity implements OnTouchListener {
 			ampmView.setText("PM");
 	}
 
+	private void formatTimeStamp(){
+		int hour = Integer.parseInt(hourView.getText().toString());
+		int minute = Integer.parseInt(minuteView.getText().toString());
+		String ampm = ampmView.getText().toString();
+		if(ampm.equals("PM")){
+			if(hour != 12)
+				hour = hour*2;
+		}
+		else{
+			if(hour == 12)
+				hour = 0;
+		}
+		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_WEEK), hour, minute);
+		time = new Timestamp(calendar.getTimeInMillis());
+	}
+
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		switch(v.getId()){
 		case R.id.footer_queue:
 			if(event.getAction() == MotionEvent.ACTION_UP){
+				sendData();
 				Toast.makeText(this, "Thank you!", Toast.LENGTH_SHORT).show();
 				finish();
 			}
@@ -177,6 +213,40 @@ public class ShareActivity extends Activity implements OnTouchListener {
 			break;
 		}
 		return true;
+	}
+
+	private void sendData(){
+		formatTimeStamp();
+		RequestQueue queue = VolleySingleton.getInstance().getRequestQueue();
+		StringRequest req = new StringRequest(Request.Method.POST,Constants.URL_QUEUE, new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				//TODO
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				//TODO
+			}
+		}){
+			@Override
+			protected Map<String,String> getParams(){
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("id_location", ""+zoneId);
+				params.put("reported", ""+contribution);
+				params.put("date", ""+time);
+
+				return params;
+			}
+
+			@Override
+			public Map<String, String> getHeaders() throws AuthFailureError {
+				Map<String,String> params = new HashMap<String, String>();
+				params.put("Content-Type","application/x-www-form-urlencoded");
+				return params;
+			}
+		};
+		queue.add(req);
 	}
 
 	private void updateHour(){
@@ -251,6 +321,24 @@ public class ShareActivity extends Activity implements OnTouchListener {
 			else{
 				title.setTextColor(getResources().getColor(R.color.red));
 			}
+		}
+	}
+
+	@Override
+	public void onCheckedChanged(RadioGroup group, int checkedId) {
+		switch(checkedId){
+		case R.id.queue1:
+			contribution = 0;
+			break;
+		case R.id.queue2:
+			contribution = 1;
+			break;
+		case R.id.queue3:
+			contribution = 2;
+			break;
+		case R.id.queue4:
+			contribution = 3;
+			break;
 		}
 	}
 }

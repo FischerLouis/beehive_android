@@ -82,7 +82,7 @@ public class Zone {
 	public void setSubZone(boolean isSubZone) {
 		this.isSubZone = isSubZone;
 	}
-	
+
 	public String getOccupancy() {
 		return occupancy;
 	}
@@ -98,7 +98,7 @@ public class Zone {
 	public void setTimeToGo(String timeToGo) {
 		this.timeToGo = timeToGo;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Zone [id=" + id + ", name=" + name + ", latitude=" + latitude

@@ -12,18 +12,22 @@ import com.beehive.objects.Zone;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ZonesListAdapter extends ArrayAdapter<Zone> {
+public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 
 	private final Context context;
-	private final ArrayList<Zone> zones;
+	private ArrayList<Zone> zones;
 	private ImageLoader mImageLoader;
+	private ZoneFilter zoneFilter;
 
 	public ZonesListAdapter(Context context,int resourceId, ArrayList<Zone> zones) {
 		super(context, resourceId, zones);
@@ -69,6 +73,20 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 		return rowView;
 	}
 
+	@Override
+	public Filter getFilter() {
+		if (zoneFilter == null) {
+			zoneFilter = new ZoneFilter();
+		}
+		return zoneFilter;
+	}
+	
+	@Override
+	public int getCount()
+	{
+	   return zones.size();
+	}
+
 	private void setColorTitle(TextView title, String occupancy){
 		int percentageChar = occupancy.indexOf("%");
 		if(percentageChar>0){
@@ -86,7 +104,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 	}
 
 	private void setImage(String url, ImageView imageView){
-		
+
 		final ImageView view = imageView;
 
 		if(VolleySingleton.getInstance().getRequestQueue().getCache().get(url)!=null){
@@ -107,6 +125,77 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> {
 					}
 				}
 			});
+		}
+	}
+
+	private class ZoneFilter extends Filter {
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			FilterResults results = new FilterResults();
+			if (constraint == null || constraint.length() == 0) {
+				// No filter implemented we return all the list
+				results.values = zones;
+				results.count = zones.size();
+			}
+			else{
+				// VARS
+				ArrayList<Zone> zoneRes = new ArrayList<Zone>();
+				boolean addSubZone = false;
+				boolean zoneAdded = false;
+				int indexZoneSaved = -1;
+				// MATCHING ZONE
+				for(int i=0;i<zones.size();i++){
+					// ZONE
+					if(!zones.get(i).isSubZone()){
+						Zone curZone = zones.get(i);
+						addSubZone = false;
+						zoneAdded = false;
+						if(curZone.getName().contains(constraint)){
+							zoneRes.add(curZone);
+							addSubZone = true;
+							Log.v("ZONE MATCH",curZone.getName());
+						}
+						else{
+							indexZoneSaved = i;
+						}
+					}
+					// SUB ZONE
+					else{
+						Zone curSubZone = zones.get(i);
+						if(addSubZone){
+							zoneRes.add(curSubZone);
+						}
+						else{
+							if(curSubZone.getName().contains(constraint.toString())){
+								Log.v("SUBZONE MATCH",curSubZone.getName());
+								if(zoneAdded){
+									zoneRes.add(curSubZone);
+								}
+								else{
+									zoneRes.add(zones.get(indexZoneSaved));
+									zoneRes.add(curSubZone);
+									zoneAdded = true;
+								}
+							}
+						}
+					}
+				}
+				results.values = zoneRes;
+				results.count = zoneRes.size();
+				Log.v("COUNT",""+results.count);
+			}
+			return results;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void publishResults(CharSequence constraint,FilterResults results) {
+			if (results.count == 0)
+				notifyDataSetInvalidated();
+			else {
+				zones = (ArrayList<Zone>) results.values;
+				notifyDataSetChanged();
+			}
 		}
 	}
 

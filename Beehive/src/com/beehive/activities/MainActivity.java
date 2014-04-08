@@ -37,9 +37,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener, OnQueryTextListener {
 
 	private Menu optionsMenu;
 	private RequestQueue queue;
@@ -212,7 +213,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
+		searchView.setOnQueryTextListener(this);
 		return true;
 	}
 
@@ -238,7 +239,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		int itemId = item.getItemId();
 		switch(itemId){
 		case R.id.action_search:
-			Toast.makeText(this, "Action search selected", Toast.LENGTH_SHORT).show();
+			//TODO
 			break;
 		case R.id.action_refresh:
 			isRefreshing = true;
@@ -280,5 +281,18 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}
 			return null;
 		}
+	}
+
+	@Override
+	public boolean onQueryTextSubmit(String query) {
+		Log.v("SUBMIT",query);
+		return false;
+	}
+
+	@Override
+	public boolean onQueryTextChange(String newText) {
+		//if(fragmentListCommunicator != null)
+			//fragmentListCommunicator.passQueryTextChange(newText);
+		return false;
 	}
 }
