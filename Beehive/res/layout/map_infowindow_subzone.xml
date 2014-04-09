@@ -104,5 +104,37 @@
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>
+    
+    
+    <!-- /// BEST TIME TO GO /// -->
+
+    <LinearLayout
+        android:id="@+id/queue_layout"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timetogo_layout"
+        android:layout_toRightOf="@+id/subzone_pic"
+        android:orientation="horizontal" >
+
+        <!-- /// QUEUE /// -->
+
+        <TextView
+            android:id="@+id/subzone_queue_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/queue"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/subzone_queue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/string_default"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
 
 </RelativeLayout>

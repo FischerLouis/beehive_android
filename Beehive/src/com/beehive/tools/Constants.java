@@ -17,7 +17,7 @@ public class Constants {
 	
 	public static final int CHART_DISPLACEMENT = 655;
 	
-	public static final int OCCUPANCY_THRESHOLD_LOW = 50;
-	public static final int OCCUPANCY_THRESHOLD_HIGH = 90;
-
+	public static final float MAP_ZOOM_THRESHOLD = 17f;
+	public static final float MAP_ZOOM_INIT = 14.5f;
+	
 }

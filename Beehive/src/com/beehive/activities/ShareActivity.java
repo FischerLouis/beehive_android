@@ -1,6 +1,5 @@
 package com.beehive.activities;
 
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,19 +16,13 @@ import com.beehive.tools.Constants;
 import com.beehive.tools.VolleySingleton;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.InputType;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -50,21 +43,21 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 	private TextView ampmView;
 	private RadioGroup radioGroup;
 	private int contribution = 0;
-	private Timestamp time = null;
-	private Activity activity = this;
 	private Calendar calendar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_share);
-		//Retrieve data from intent
+		// DATA FROM INTENT
 		Intent intent = getIntent();
 		zoneId = intent.getIntExtra("ID", 0);
 		title = intent.getStringExtra("TITLE");
 		subtitle = intent.getStringExtra("SUBTITLE");
 		occupancy = intent.getStringExtra("OCCUPANCY");
 		timeToGo = intent.getStringExtra("TIMETOGO");
+		String queue = intent.getStringExtra("QUEUE");
+		int colorTitle = intent.getIntExtra("TITLECOLOR",R.color.black);
 
 		Bundle extras = intent.getExtras();
 		bm = extras.getParcelable(Constants.KEY_PIC);
@@ -73,6 +66,7 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 		TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 		TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
+		TextView queueView = (TextView)findViewById(R.id.queue);
 		ImageView pic = (ImageView)findViewById(R.id.pics);
 		LinearLayout sendLayout = (LinearLayout)findViewById(R.id.footer_queue);
 		hourView = (TextView)findViewById(R.id.time_hour);
@@ -82,18 +76,16 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		pic.setImageBitmap(bm);
 		//Setting up data
 		titleView.setText(title);
+		titleView.setTextColor(colorTitle);
 		subtitleView.setText(subtitle);
-		if(occupancy != null){
+		if(occupancy != null)
 			occupancyView.setText(occupancy);
-			setColorTitle(titleView, occupancy);
-		}
 		if(timeToGo != null)
 			timeToGoView.setText(timeToGo);
+		if(queue != null)
+			queueView.setText(queue);
 		//LISTENER
 		sendLayout.setOnTouchListener(this);
-		hourView.setOnTouchListener(this);
-		minuteView.setOnTouchListener(this);
-		ampmView.setOnTouchListener(this);
 		radioGroup.setOnCheckedChangeListener(this);
 		//INIT TIME
 		Date now = new Date();
@@ -146,69 +138,14 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 			ampmView.setText("PM");
 	}
 
-	private void formatTimeStamp(){
-		int hour = Integer.parseInt(hourView.getText().toString());
-		int minute = Integer.parseInt(minuteView.getText().toString());
-		String ampm = ampmView.getText().toString();
-		if(ampm.equals("PM")){
-			if(hour != 12)
-				hour = hour*2;
-		}
-		else{
-			if(hour == 12)
-				hour = 0;
-		}
-		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_WEEK), hour, minute);
-		time = new Timestamp(calendar.getTimeInMillis());
-	}
-
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		switch(v.getId()){
 		case R.id.footer_queue:
 			if(event.getAction() == MotionEvent.ACTION_UP){
 				sendData();
-				Toast.makeText(this, "Thank you!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "BeeHive thanks you! +1", Toast.LENGTH_SHORT).show();
 				finish();
-			}
-			break;
-		case R.id.time_hour:
-			switch(event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				hourView.setBackgroundColor(getResources().getColor(R.color.orange));
-				hourView.setTextColor(Color.WHITE);
-				break;
-			case MotionEvent.ACTION_UP:
-				hourView.setBackgroundColor(Color.TRANSPARENT);
-				hourView.setTextColor(getResources().getColor(R.color.orange));
-				updateHour();
-				break;
-			}
-			break;
-		case R.id.time_minutes:
-			switch(event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				minuteView.setBackgroundColor(getResources().getColor(R.color.orange));
-				minuteView.setTextColor(Color.WHITE);
-				break;
-			case MotionEvent.ACTION_UP:
-				minuteView.setBackgroundColor(Color.TRANSPARENT);
-				minuteView.setTextColor(getResources().getColor(R.color.orange));
-				updateMinute();
-				break;
-			}
-			break;
-		case R.id.time_ampm:
-			switch(event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				ampmView.setBackgroundColor(getResources().getColor(R.color.orange));
-				ampmView.setTextColor(Color.WHITE);
-				break;
-			case MotionEvent.ACTION_UP:
-				ampmView.setBackgroundColor(Color.TRANSPARENT);
-				ampmView.setTextColor(getResources().getColor(R.color.orange));
-				updateAmpm();
-				break;
 			}
 			break;
 		}
@@ -216,7 +153,6 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 	}
 
 	private void sendData(){
-		formatTimeStamp();
 		RequestQueue queue = VolleySingleton.getInstance().getRequestQueue();
 		StringRequest req = new StringRequest(Request.Method.POST,Constants.URL_QUEUE, new Response.Listener<String>() {
 			@Override
@@ -234,7 +170,6 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 				Map<String, String> params = new HashMap<String, String>();
 				params.put("id_location", ""+zoneId);
 				params.put("reported", ""+contribution);
-				params.put("date", ""+time);
 
 				return params;
 			}
@@ -247,81 +182,6 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 			}
 		};
 		queue.add(req);
-	}
-
-	private void updateHour(){
-		final EditText input = new EditText(this);
-		input.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-		new AlertDialog.Builder(this)
-		.setTitle("Change hours")
-		.setView(input)
-		.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				int result = 0;
-				try{
-					result = Integer.parseInt(input.getText().toString().replaceAll("\\s+",""));
-				}catch(NumberFormatException e){
-				}
-				if(result >=1 && result <=12)
-					hourView.setText(""+result);
-				else
-					Toast.makeText(activity, "Error", Toast.LENGTH_SHORT).show();
-			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				// Do nothing.
-			}
-		}).show();
-	}
-
-	private void updateMinute(){
-		final EditText input = new EditText(this);
-		input.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-		new AlertDialog.Builder(this)
-		.setTitle("Change minutes")
-		.setView(input)
-		.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				int result = 0;
-				try{
-					result = Integer.parseInt(input.getText().toString().replaceAll("\\s+",""));
-				}catch(NumberFormatException e){
-				}
-				if(result >=0 && result <=59)
-					minuteView.setText(""+result);
-				else
-					Toast.makeText(activity, "Error", Toast.LENGTH_SHORT).show();
-			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				// Do nothing.
-			}
-		}).show();
-	}
-
-	private void updateAmpm(){
-		if(ampmView.getText().equals("PM"))
-			ampmView.setText("AM");
-		else
-			ampmView.setText("PM");
-	}
-
-	private void setColorTitle(TextView title, String occupancy){
-		int percentageChar = occupancy.indexOf("%");
-		if(percentageChar>0){
-			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
-				title.setTextColor(getResources().getColor(R.color.green));
-			}
-			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
-				title.setTextColor(getResources().getColor(R.color.orange));
-			}
-			else{
-				title.setTextColor(getResources().getColor(R.color.red));
-			}
-		}
 	}
 
 	@Override

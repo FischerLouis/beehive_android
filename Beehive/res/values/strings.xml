@@ -3,11 +3,9 @@
 
     <string name="release_key">AIzaSyDiriRGQ6Gz7ZCbZcSbaFBnewZeHLifPbc</string>
     <string name="debug_key">AIzaSyBN21-mklbCy-T-ZEEQGWXpGl_JEiuIQYo</string>
-    
     <string name="id_tag_key">id</string>
     <string name="subzone_tag_key">subzone</string>
     <string name="urlpic_tag_key">urlpic</string>
-
     <string name="app_name">Beehive</string>
     <string name="action_settings">Settings</string>
     <string name="title_section1">Map</string>
@@ -39,6 +37,7 @@
     <string name="occupancy">Occupancy: \u0020</string>
     <string name="time_to_go">Go: \u0020</string>
     <string name="string_default">N/A</string>
-     <string name="image_description">TODO</string>
+    <string name="image_description">TODO</string>
+    <string name="queue">Queue: \u0020</string>
 
 </resources>

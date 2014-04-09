@@ -8,8 +8,11 @@ public class Zone {
 	private double longitude;
 	private String description;
 	private String urlPic;
-	private String occupancy = "N/A";
+	private int occupancy;
+	private int thresholdMin;
+	private int thresholdMax;
 	private String timeToGo = "N/A";
+	private String queue = "N/A";
 	private boolean isSubZone = true;
 
 	// Constructor Zone WITHOUT REALTIMEDATA
@@ -26,7 +29,7 @@ public class Zone {
 	}
 	// Constructor Zone WITH REALTIMEDATA
 	public Zone(int id, String name, double latitude, double longitude,
-			String description, String urlPic, String occupancy,
+			String description, String urlPic, int occupancy,
 			String timeToGo, boolean isSubZone) {
 		super();
 		this.id = id;
@@ -83,11 +86,11 @@ public class Zone {
 		this.isSubZone = isSubZone;
 	}
 
-	public String getOccupancy() {
+	public int getOccupancy() {
 		return occupancy;
 	}
 
-	public void setOccupancy(String occupancy) {
+	public void setOccupancy(int occupancy) {
 		this.occupancy = occupancy;
 	}
 
@@ -99,11 +102,33 @@ public class Zone {
 		this.timeToGo = timeToGo;
 	}
 
+	public String getQueue() {
+		return queue;
+	}
+	public void setQueue(String queue) {
+		this.queue = queue;
+	}
+
+	public int getThresholdMin() {
+		return thresholdMin;
+	}
+	public void setThresholdMin(int thresholdMin) {
+		this.thresholdMin = thresholdMin;
+	}
+	public int getThresholdMax() {
+		return thresholdMax;
+	}
+	public void setThresholdMax(int thresholdMax) {
+		this.thresholdMax = thresholdMax;
+	}
+
 	@Override
 	public String toString() {
 		return "Zone [id=" + id + ", name=" + name + ", latitude=" + latitude
 				+ ", longitude=" + longitude + ", description=" + description
 				+ ", urlPic=" + urlPic + ", occupancy=" + occupancy
-				+ ", timeToGo=" + timeToGo + ", isSubZone=" + isSubZone + "]";
+				+ ", thresholdMin=" + thresholdMin + ", thresholdMax="
+				+ thresholdMax + ", timeToGo=" + timeToGo + ", queue=" + queue
+				+ ", isSubZone=" + isSubZone + "]";
 	}
 }

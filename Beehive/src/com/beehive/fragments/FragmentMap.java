@@ -57,8 +57,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	// Google Map
 	private GoogleMap googleMap;
 	//Initialize the zoom value
-	private float previousZoomLevel = 14.5f;
-	private boolean isZooming = false;
+	private float previousZoomLevel = Constants.MAP_ZOOM_INIT;
+	//private boolean isZooming = false;
 	//Data
 	private HashMap<String,AddInfoZone> addInfoZoneHm;
 	private HashMap<Integer,RealTimeInfoZone> realTimeInfoZoneHm;
@@ -86,6 +86,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		super.onCreate(savedInstanceState);
 		//mImageLoader = ImageLoaderProvider.getImageLoader(context, VolleyProvider.getQueue(context));
 		mImageLoader = VolleySingleton.getInstance().getImageLoader();
+		Log.v("ONCREATE","ONCREATE");
 	}
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -99,8 +100,9 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		} catch (InflateException e) {
 			/* map is already there, just return view as it is */
 		}
-		setRetainInstance(true);
+		//setRetainInstance(true);
 		initMap();
+		Log.v("ONCREATEVIEW","ONCREATEVIEW");
 		return view;
 	}
 
@@ -117,6 +119,13 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			}
 			((MainActivity)context).loadMapFromCache = false;
 		}
+		Log.v("ONRESUME","ONRESUME");
+	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		showMarkers(false, false);
 	}
 
 	private void initMap(){
@@ -200,9 +209,14 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			AddInfoZone curZoneInfo = new AddInfoZone(curZoneId, curZoneName, curZoneDescription, curZoneUrlPic, picList);
 			addInfoZoneHm.put(curZoneName, curZoneInfo);
 		}
-
+		showMarkers(false, false);
 		//DISPLAYING MARKERS
-		setMarkers();
+		if(previousZoomLevel >= Constants.MAP_ZOOM_THRESHOLD){
+			showMarkers(false, true);
+		}
+		else {
+			showMarkers(true, false);
+		}
 	}
 
 	public void updateRealTimeData(JSONArray json) throws JSONException{
@@ -216,17 +230,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 
 		for (int i=0;i<json.length();i++){
 			JSONObject curObj = json.getJSONObject(i);
-			RealTimeInfoZone curRealTimeInfoZone = new RealTimeInfoZone(curObj.getInt("id"), curObj.getString("occupancy"), curObj.getString("best_time"));
+			RealTimeInfoZone curRealTimeInfoZone = new RealTimeInfoZone(curObj.getInt("id"), curObj.getInt("occupancy_percent"), curObj.getString("best_time"), curObj.getString("queue"), curObj.getInt("threshold_min"), curObj.getInt("threshold_max"));
 			realTimeInfoZoneHm.put(curObj.getInt("id"), curRealTimeInfoZone);
-		}
-	}
-
-	private void setMarkers(){		
-		for(int i=0;i<markersZoneList.size();i++){
-			markersZoneList.get(i).setVisible(true);
-		}
-		for(int j=0;j<markersSubZoneList.size();j++){
-			markersSubZoneList.get(j).setVisible(false);
 		}
 	}
 
@@ -236,8 +241,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		String markerTitle = marker.getTitle();
 
 		if(zonesList.containsKey(markerTitle)){
-			googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(marker.getPosition() , 17f) );
-			hideZoneMarker();
+			googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(marker.getPosition() , Constants.MAP_ZOOM_THRESHOLD) );
+			showMarkers(false, true);
 		}
 		else{
 			Intent intent = new Intent(getActivity(), StatisticsActivity.class);
@@ -249,6 +254,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			if(realTimeInfoZoneHm != null){
 				intent.putExtra("OCCUPANCY",realTimeInfoZoneHm.get(id).getOccupancy());
 				intent.putExtra("TIMETOGO",realTimeInfoZoneHm.get(id).getBestTime());
+				intent.putExtra("QUEUE",realTimeInfoZoneHm.get(id).getQueue());
+				intent.putExtra("TITLECOLOR",getColorTitle(realTimeInfoZoneHm.get(id).getOccupancy(), realTimeInfoZoneHm.get(id).getThresholdMin(), realTimeInfoZoneHm.get(id).getThresholdMax()));
 			}
 			startActivity(intent);
 		}
@@ -276,8 +283,9 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			view = getActivity().getLayoutInflater().inflate(R.layout.map_infowindow_subzone, null);
 			TextView subZoneName = (TextView)view.findViewById(R.id.subzone_name);
 			TextView subZoneDescription = (TextView)view.findViewById(R.id.subzone_description);
-			TextView zubZoneOccupancy = (TextView)view.findViewById(R.id.subzone_occupancy);
-			TextView zubZoneTimeToGo = (TextView)view.findViewById(R.id.subzone_timetogo);
+			TextView subZoneOccupancy = (TextView)view.findViewById(R.id.subzone_occupancy);
+			TextView subZoneTimeToGo = (TextView)view.findViewById(R.id.subzone_timetogo);
+			TextView subZoneQueue = (TextView)view.findViewById(R.id.subzone_queue);
 			ImageView subZonePic = (ImageView)view.findViewById(R.id.subzone_pic);
 			AddInfoZone info = addInfoZoneHm.get(markerTitle);
 			subZoneName.setText(markerTitle);
@@ -287,27 +295,36 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			// REAL TIME INFO
 			if(realTimeInfoZoneHm != null){
 				RealTimeInfoZone realTimeInfo = realTimeInfoZoneHm.get(info.getId());
-				zubZoneOccupancy.setText(realTimeInfo.getOccupancy());
-				zubZoneTimeToGo.setText(realTimeInfo.getBestTime());
-				setColorTitle(subZoneName, realTimeInfo.getOccupancy());
+				subZoneOccupancy.setText(realTimeInfo.getOccupancy()+"%");
+				subZoneTimeToGo.setText(realTimeInfo.getBestTime());
+				subZoneQueue.setText(realTimeInfo.getQueue());
+				setColorTitle(subZoneName, realTimeInfo.getOccupancy(), realTimeInfo.getThresholdMin(), realTimeInfo.getThresholdMax());
 			}			
 		}
 		return view;
 	}
 
-	private void setColorTitle(TextView title, String occupancy){
-		int percentageChar = occupancy.indexOf("%");
-		if(percentageChar>0){
-			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
-				title.setTextColor(context.getResources().getColor(R.color.green));
-			}
-			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
-				title.setTextColor(context.getResources().getColor(R.color.orange));
-			}
-			else{
-				title.setTextColor(context.getResources().getColor(R.color.red));
-			}
+	private void setColorTitle(TextView title, int occupancy, int thresholdMin, int thresholdMax){
+		if(occupancy < thresholdMin){
+			title.setTextColor(context.getResources().getColor(R.color.green));
+		}
+		else if(occupancy < thresholdMax){
+			title.setTextColor(context.getResources().getColor(R.color.orange));
+		}
+		else{
+			title.setTextColor(context.getResources().getColor(R.color.red));
+		}
+	}
+
+	private int getColorTitle(int occupancy, int thresholdMin, int thresholdMax){
+		if(occupancy < thresholdMin){
+			return context.getResources().getColor(R.color.green);
+		}
+		else if(occupancy < thresholdMax){
+			return context.getResources().getColor(R.color.orange);
+		}
+		else{
+			return context.getResources().getColor(R.color.red);
 		}
 	}
 
@@ -320,32 +337,28 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	public void onCameraChange(CameraPosition position) {
 		if(previousZoomLevel != position.zoom)
 		{
-			isZooming = true;
-			if(position.zoom >= 17f){
-				hideZoneMarker();
+			if(position.zoom >= Constants.MAP_ZOOM_THRESHOLD){
+				showMarkers(false, true);
 			}
-			else if(position.zoom < 17f){
-				hideSubZoneMarker();
+			else {
+				showMarkers(true, false);
 			}          
-		}
-		else{
-			isZooming = false;
 		}
 		previousZoomLevel = position.zoom;		
 	}
 
-	private void hideZoneMarker(){
+	private void showMarkers(boolean showZone, boolean showSubZone){
 		for(int i=0;i<markersZoneList.size();i++){
-			markersZoneList.get(i).setVisible(false);
+			markersZoneList.get(i).setVisible(showZone);
 		}
 		for(int j=0;j<markersSubZoneList.size();j++){
-			markersSubZoneList.get(j).setVisible(true);
+			markersSubZoneList.get(j).setVisible(showSubZone);
 		}
 	}
 
-	private void hideSubZoneMarker(){
+	private void clearMarkers(){
 		for(int i=0;i<markersZoneList.size();i++){
-			markersZoneList.get(i).setVisible(true);
+			markersZoneList.get(i).setVisible(false);
 		}
 		for(int j=0;j<markersSubZoneList.size();j++){
 			markersSubZoneList.get(j).setVisible(false);

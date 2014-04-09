@@ -26,7 +26,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class FragmentList extends ListFragment implements FragmentListCommunicator, OnItemClickListener {
 
@@ -122,8 +121,11 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			int curId = curObj.getInt("id");
 			for(int j=0;j<zonesList.size();j++){
 				if(zonesList.get(j).getId()==curId && zonesList.get(j).isSubZone()){
-					zonesList.get(j).setOccupancy(curObj.getString("occupancy"));
+					zonesList.get(j).setOccupancy(curObj.getInt("occupancy_percent"));
 					zonesList.get(j).setTimeToGo(curObj.getString("best_time"));
+					zonesList.get(j).setQueue(curObj.getString("queue"));
+					zonesList.get(j).setThresholdMin(curObj.getInt("threshold_min"));
+					zonesList.get(j).setThresholdMax(curObj.getInt("threshold_max"));
 				}
 			}
 		}
@@ -140,11 +142,13 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			TextView subtitleView = (TextView)view.findViewById(R.id.subtitle);
 			TextView occupancyView = (TextView)view.findViewById(R.id.occupancy);
 			TextView timeToGoView = (TextView)view.findViewById(R.id.time_to_go);
+			TextView queueView = (TextView)view.findViewById(R.id.queue);
 			//SET VAR			
 			String title = titleView.getText().toString();
 			String subtitle = subtitleView.getText().toString();
 			String occupancy = occupancyView.getText().toString();
 			String timeToGo = timeToGoView.getText().toString();
+			String queue = queueView.getText().toString();
 			int idView = (Integer) view.getTag(R.string.id_tag_key);
 			String urlPic = (String) view.getTag(R.string.urlpic_tag_key);
 			//PUT VALUES
@@ -153,6 +157,8 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			intent.putExtra("SUBTITLE", subtitle);
 			intent.putExtra("OCCUPANCY", occupancy);
 			intent.putExtra("TIMETOGO", timeToGo);
+			intent.putExtra("QUEUE", queue);
+			intent.putExtra("TITLECOLOR", titleView.getCurrentTextColor());
 			intent.putExtra("URLPIC", urlPic);
 			startActivity(intent);
 		}

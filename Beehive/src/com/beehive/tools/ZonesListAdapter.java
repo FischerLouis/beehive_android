@@ -26,6 +26,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 
 	private final Context context;
 	private ArrayList<Zone> zones;
+	private ArrayList<Zone> savedZones;
 	private ImageLoader mImageLoader;
 	private ZoneFilter zoneFilter;
 
@@ -33,6 +34,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		super(context, resourceId, zones);
 		this.context = context;
 		this.zones = zones;
+		this.savedZones = zones;
 		mImageLoader = VolleySingleton.getInstance().getImageLoader();
 	}
 
@@ -59,7 +61,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 
 			title.setText(curZone.getName());
 			description.setText(curZone.getDescription());
-			occupancy.setText(curZone.getOccupancy());
+			occupancy.setText(curZone.getOccupancy()+"%");
 			timeToGo.setText(curZone.getTimeToGo());
 			// TAG ID ZONE
 			rowView.setTag(R.string.id_tag_key, viewId);
@@ -68,7 +70,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 			// IMAGE FROM CACHE IF EXISTING
 			setImage(curZone.getUrlPic(), subZonePic);
 			// TITLE ACCORDING TO THE OCCUPANCY
-			setColorTitle(title, curZone.getOccupancy());
+			setColorTitle(title, curZone.getOccupancy(), curZone.getThresholdMin(), curZone.getThresholdMax());
 		}
 		return rowView;
 	}
@@ -80,26 +82,32 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		}
 		return zoneFilter;
 	}
-	
+
+	@Override
+	public Zone getItem(int i) {
+		return zones.get(i);
+	}
+
+	@Override
+	public long getItemId(int i) {
+		return i;
+	}
+
 	@Override
 	public int getCount()
 	{
-	   return zones.size();
+		return zones.size();
 	}
 
-	private void setColorTitle(TextView title, String occupancy){
-		int percentageChar = occupancy.indexOf("%");
-		if(percentageChar>0){
-			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
-				title.setTextColor(context.getResources().getColor(R.color.green));
-			}
-			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
-				title.setTextColor(context.getResources().getColor(R.color.orange));
-			}
-			else{
-				title.setTextColor(context.getResources().getColor(R.color.red));
-			}
+	private void setColorTitle(TextView title, int occupancy, int thresholdMin, int thresholdMax){
+		if(occupancy < thresholdMin){
+			title.setTextColor(context.getResources().getColor(R.color.green));
+		}
+		else if(occupancy < thresholdMax){
+			title.setTextColor(context.getResources().getColor(R.color.orange));
+		}
+		else{
+			title.setTextColor(context.getResources().getColor(R.color.red));
 		}
 	}
 
@@ -134,8 +142,8 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 			FilterResults results = new FilterResults();
 			if (constraint == null || constraint.length() == 0) {
 				// No filter implemented we return all the list
-				results.values = zones;
-				results.count = zones.size();
+				results.values = savedZones;
+				results.count = savedZones.size();
 			}
 			else{
 				// VARS
@@ -144,16 +152,15 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 				boolean zoneAdded = false;
 				int indexZoneSaved = -1;
 				// MATCHING ZONE
-				for(int i=0;i<zones.size();i++){
+				for(int i=0;i<savedZones.size();i++){
 					// ZONE
-					if(!zones.get(i).isSubZone()){
-						Zone curZone = zones.get(i);
+					if(!savedZones.get(i).isSubZone()){
+						Zone curZone = savedZones.get(i);
 						addSubZone = false;
 						zoneAdded = false;
-						if(curZone.getName().contains(constraint)){
+						if(curZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
 							zoneRes.add(curZone);
 							addSubZone = true;
-							Log.v("ZONE MATCH",curZone.getName());
 						}
 						else{
 							indexZoneSaved = i;
@@ -161,18 +168,17 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 					}
 					// SUB ZONE
 					else{
-						Zone curSubZone = zones.get(i);
+						Zone curSubZone = savedZones.get(i);
 						if(addSubZone){
 							zoneRes.add(curSubZone);
 						}
 						else{
-							if(curSubZone.getName().contains(constraint.toString())){
-								Log.v("SUBZONE MATCH",curSubZone.getName());
+							if(curSubZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
 								if(zoneAdded){
 									zoneRes.add(curSubZone);
 								}
 								else{
-									zoneRes.add(zones.get(indexZoneSaved));
+									zoneRes.add(savedZones.get(indexZoneSaved));
 									zoneRes.add(curSubZone);
 									zoneAdded = true;
 								}
@@ -182,7 +188,6 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 				}
 				results.values = zoneRes;
 				results.count = zoneRes.size();
-				Log.v("COUNT",""+results.count);
 			}
 			return results;
 		}

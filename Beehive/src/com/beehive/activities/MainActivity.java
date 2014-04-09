@@ -291,8 +291,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 	@Override
 	public boolean onQueryTextChange(String newText) {
-		//if(fragmentListCommunicator != null)
-			//fragmentListCommunicator.passQueryTextChange(newText);
+		if(fragmentListCommunicator != null)
+			fragmentListCommunicator.passQueryTextChange(newText);
 		return false;
 	}
 }

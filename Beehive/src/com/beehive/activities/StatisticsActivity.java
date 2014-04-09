@@ -65,26 +65,29 @@ public class StatisticsActivity extends Activity {
 		zoneId = intent.getIntExtra("ID", 0);
 		String title = intent.getStringExtra("TITLE");
 		String subtitle = intent.getStringExtra("SUBTITLE");
-		String occupancy = intent.getStringExtra("OCCUPANCY");
+		int occupancy = intent.getIntExtra("OCCUPANCY", 0);
 		String timeToGo = intent.getStringExtra("TIMETOGO");
+		String queue = intent.getStringExtra("QUEUE");
+		int colorTitle = intent.getIntExtra("TITLECOLOR",R.color.black);
 		String urlPic = intent.getStringExtra("URLPIC");
 		// VIEWS
 		TextView titleView = (TextView)findViewById(R.id.title);
 		TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 		TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 		TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
+		TextView queueView = (TextView)findViewById(R.id.queue);
 		ImageView pic = (ImageView)findViewById(R.id.pics);
 		hsv = (HorizontalScrollView) findViewById(R.id.hsw);
 		//Setting up data
 		titleView.setText(title);
+		titleView.setTextColor(colorTitle);
 		subtitleView.setText(subtitle);
 		setImage(urlPic, pic);
-		if(occupancy != null){
-			occupancyView.setText(occupancy);
-			setColorTitle(titleView, occupancy);
-		}
+		occupancyView.setText(occupancy+"%");
 		if(timeToGo != null)
 			timeToGoView.setText(timeToGo);
+		if(queue != null)
+			queueView.setText(queue);
 	}
 
 	protected void onResume() {
@@ -113,6 +116,7 @@ public class StatisticsActivity extends Activity {
 			TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 			TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 			TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
+			TextView queueView = (TextView)findViewById(R.id.queue);
 			//IMAGE PARCE
 			ImageView pic = (ImageView)findViewById(R.id.pics);
 			BitmapDrawable bmDrawable = ((BitmapDrawable) pic.getDrawable());
@@ -124,12 +128,15 @@ public class StatisticsActivity extends Activity {
 			String subtitle = subtitleView.getText().toString();
 			String occupancy = occupancyView.getText().toString();
 			String timeToGo = timeToGoView.getText().toString();
+			String queue = queueView.getText().toString();
 			//PUT VALUES
 			intent.putExtra("ID", zoneId);
 			intent.putExtra("TITLE", title);
 			intent.putExtra("SUBTITLE", subtitle);
 			intent.putExtra("OCCUPANCY", occupancy);
 			intent.putExtra("TIMETOGO", timeToGo);
+			intent.putExtra("QUEUE", queue);
+			intent.putExtra("TITLECOLOR", titleView.getCurrentTextColor());
 			intent.putExtras(picExtra);	
 			startActivity(intent);
 			break;
@@ -411,22 +418,6 @@ public class StatisticsActivity extends Activity {
 			}
 			else{
 				renderer.addYTextLabel(i, "", 0);
-			}
-		}
-	}
-
-	private void setColorTitle(TextView title, String occupancy){
-		int percentageChar = occupancy.indexOf("%");
-		if(percentageChar>0){
-			int valueOcc = Integer.parseInt(occupancy.substring(0, percentageChar));
-			if(valueOcc < Constants.OCCUPANCY_THRESHOLD_LOW){
-				title.setTextColor(getResources().getColor(R.color.green));
-			}
-			else if(valueOcc < Constants.OCCUPANCY_THRESHOLD_HIGH){
-				title.setTextColor(getResources().getColor(R.color.orange));
-			}
-			else{
-				title.setTextColor(getResources().getColor(R.color.red));
 			}
 		}
 	}
