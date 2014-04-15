@@ -86,7 +86,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		super.onCreate(savedInstanceState);
 		//mImageLoader = ImageLoaderProvider.getImageLoader(context, VolleyProvider.getQueue(context));
 		mImageLoader = VolleySingleton.getInstance().getImageLoader();
-		Log.v("ONCREATE","ONCREATE");
 	}
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,7 +101,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		}
 		//setRetainInstance(true);
 		initMap();
-		Log.v("ONCREATEVIEW","ONCREATEVIEW");
 		return view;
 	}
 
@@ -119,9 +117,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			}
 			((MainActivity)context).loadMapFromCache = false;
 		}
-		Log.v("ONRESUME","ONRESUME");
 	}
-	
+
 	@Override
 	public void onStop(){
 		super.onStop();
@@ -249,10 +246,9 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			int id = subZonesList.get(markerTitle);	
 			intent.putExtra("ID", id);
 			intent.putExtra("TITLE", markerTitle);
-			intent.putExtra("SUBTITLE", addInfoZoneHm.get(markerTitle).getDescription());
 			intent.putExtra("URLPIC", addInfoZoneHm.get(markerTitle).getUrlPic());
 			if(realTimeInfoZoneHm != null){
-				intent.putExtra("OCCUPANCY",realTimeInfoZoneHm.get(id).getOccupancy());
+				intent.putExtra("OCCUPANCY",realTimeInfoZoneHm.get(id).getOccupancy()+"%");
 				intent.putExtra("TIMETOGO",realTimeInfoZoneHm.get(id).getBestTime());
 				intent.putExtra("QUEUE",realTimeInfoZoneHm.get(id).getQueue());
 				intent.putExtra("TITLECOLOR",getColorTitle(realTimeInfoZoneHm.get(id).getOccupancy(), realTimeInfoZoneHm.get(id).getThresholdMin(), realTimeInfoZoneHm.get(id).getThresholdMax()));
@@ -356,15 +352,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		}
 	}
 
-	private void clearMarkers(){
-		for(int i=0;i<markersZoneList.size();i++){
-			markersZoneList.get(i).setVisible(false);
-		}
-		for(int j=0;j<markersSubZoneList.size();j++){
-			markersSubZoneList.get(j).setVisible(false);
-		}
-	}
-
 	private void cacheImage(String url){	
 		mImageLoader.get(url, new ImageListener() {
 
@@ -391,6 +378,22 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			Log.v("XX","FAIL");
 	}
 
+	private void displaySearchedMarkers(String query){
+		//NO ZONE MARKERS
+		for(int i=0;i<markersZoneList.size();i++){
+			markersZoneList.get(i).setVisible(false);
+		}
+		for(int j=0;j<markersSubZoneList.size();j++){
+			if(markersSubZoneList.get(j).getTitle().toUpperCase().contains(query.toString().toUpperCase())){
+				markersSubZoneList.get(j).setVisible(true);
+			}
+			else{
+				markersSubZoneList.get(j).setVisible(false);
+			}
+		}
+
+	}
+
 	@Override
 	public void passStaticData(JSONArray json) {
 		try {
@@ -406,5 +409,9 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+	@Override
+	public void passQueryTextChange(String query) {
+		displaySearchedMarkers(query);
 	}
 }

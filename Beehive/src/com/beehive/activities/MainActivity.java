@@ -59,6 +59,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	public JSONArray jsonCached;
 
 	private int curTabId = 0;
+	
+	private SearchView searchView;
 
 	TabListener tabListener = this;
 	Context context = this;
@@ -173,6 +175,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}, new Response.ErrorListener() {
 				@Override
 				public void onErrorResponse(VolleyError error) {
+					Toast.makeText(context, "Request error ... Check your data connection and try again", Toast.LENGTH_SHORT).show();
 					VolleyLog.e("Error: ", error.getMessage());
 				}
 			});
@@ -197,6 +200,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
+				Toast.makeText(context, "Request error ... Check your data connection and try again", Toast.LENGTH_SHORT).show();
 				VolleyLog.e("Error: ", error.getMessage());
 			}
 		});
@@ -211,7 +215,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				
 		// Associate searchable configuration with the SearchView
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+		searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setOnQueryTextListener(this);
 		return true;
@@ -284,15 +288,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	}
 
 	@Override
-	public boolean onQueryTextSubmit(String query) {
-		Log.v("SUBMIT",query);
-		return false;
+	public boolean onQueryTextSubmit(String textSearched) {
+		if(fragmentListCommunicator != null)
+			fragmentListCommunicator.passQueryText(textSearched, true);
+		searchView.clearFocus();
+		return true;
 	}
 
 	@Override
 	public boolean onQueryTextChange(String newText) {
 		if(fragmentListCommunicator != null)
-			fragmentListCommunicator.passQueryTextChange(newText);
+			fragmentListCommunicator.passQueryText(newText, false);
+		if(fragmentMapCommunicator != null)
+			fragmentMapCommunicator.passQueryTextChange(newText);
 		return false;
 	}
 }

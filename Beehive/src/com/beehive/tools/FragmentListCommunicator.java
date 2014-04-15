@@ -5,5 +5,5 @@ import org.json.JSONArray;
 public interface FragmentListCommunicator {
 	public void passStaticData(JSONArray json);
 	public void passRealTimeData(JSONArray json);
-	public void passQueryTextChange(String query);
+	public void passQueryText(String query, boolean isFinalSearch);
 }

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
     <include
         android:id="@+id/header"
-        layout="@layout/zoneslist_row_subzone" />
+        layout="@layout/mini_row_subzone" />
 
     <View
         android:id="@+id/separator"
@@ -23,30 +22,30 @@
         android:paddingBottom="45dp"
         android:weightSum="1" >
 
-        <!-- LAYOUT TIME -->
+        <!-- LAYOUT CONTRIBUTION -->
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.3"
+            android:layout_weight="0.35"
             android:orientation="vertical" >
 
-            <!-- TIME TITLE -->
+            <!-- CONTRIBUTION TITLE -->
 
             <RelativeLayout
-                android:id="@+id/title_week_layout"
+                android:id="@+id/title_total_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:background="@color/orange"
                 android:orientation="vertical" >
 
                 <TextView
-                    android:id="@+id/title_time"
+                    android:id="@+id/title_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_marginBottom="4dp"
-                    android:text="@string/title_time"
+                    android:text="@string/title_contribution"
                     android:textColor="@color/white"
                     android:textSize="20sp" />
 
@@ -58,47 +57,47 @@
                     android:background="@color/white" />
             </RelativeLayout>
 
-            <!-- TIME -->
+            <!-- TOTAL CONTRIBUTION -->
 
             <LinearLayout
-                android:id="@+id/time_layout"
+                android:id="@+id/layout_contribution"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal" >
+                android:orientation="vertical" >
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center" >
+
+                    <TextView
+                        android:id="@+id/total_contribution"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/contribution_default"
+                        android:textColor="@color/orange"
+                        android:textSize="70sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/contribution_pts"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@+id/total_contribution"
+                        android:layout_toRightOf="@+id/total_contribution"
+                        android:text="@string/contribution_pts_default"
+                        android:textColor="@color/orange"
+                        android:textSize="20sp" />
+                </RelativeLayout>
 
                 <TextView
-                    android:id="@+id/time_hour"
+                    android:id="@+id/contribution_rank"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/time_hour_default"
-                    android:textColor="@color/orange"
-                    android:textSize="70sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/time_separator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/time_separator"
-                    android:textColor="@color/orange"
-                    android:textSize="70sp" />
-
-                <TextView
-                    android:id="@+id/time_minutes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/time_minutes_default"
-                    android:textColor="@color/orange"
-                    android:textSize="70sp" />
-
-                <TextView
-                    android:id="@+id/time_ampm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/time_ampm_default"
-                    android:textColor="@color/orange"
-                    android:textSize="30sp" />
+                    android:layout_gravity="center"
+                    android:text="@string/contribution_rank_default"
+                    android:textColor="@color/green"
+                    android:textSize="15sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -107,7 +106,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.7"
+            android:layout_weight="0.65"
             android:orientation="vertical" >
 
             <!-- QUEUE TITLE -->
@@ -150,7 +149,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="30dp"
+                    android:layout_marginBottom="10dp"
                     android:text="@string/queue_question"
                     android:textColor="@color/orange"
                     android:textSize="25sp" />

@@ -6,7 +6,7 @@
 
     <include
         android:id="@+id/header"
-        layout="@layout/zoneslist_row_subzone" />
+        layout="@layout/mini_row_subzone" />
 
     <View
         android:id="@+id/separator"

@@ -21,6 +21,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 
@@ -29,6 +30,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 	private ArrayList<Zone> savedZones;
 	private ImageLoader mImageLoader;
 	private ZoneFilter zoneFilter;
+	private boolean isFinalSearch = false;
 
 	public ZonesListAdapter(Context context,int resourceId, ArrayList<Zone> zones) {
 		super(context, resourceId, zones);
@@ -44,18 +46,23 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View rowView = null;
 		if(!curZone.isSubZone()){
+			//VIEW
 			rowView = inflater.inflate(R.layout.zoneslist_row_zone, parent, false);
 			TextView title = (TextView) rowView.findViewById(R.id.zone_title);
+			//DATA
 			title.setText(curZone.getName());
 			rowView.setTag(R.string.subzone_tag_key, "zone");
 		}
 		else{
+			//VIEW
 			rowView = inflater.inflate(R.layout.zoneslist_row_subzone, parent, false);
 			TextView title = (TextView) rowView.findViewById(R.id.title);
 			TextView description = (TextView) rowView.findViewById(R.id.subtitle);
 			TextView occupancy = (TextView) rowView.findViewById(R.id.occupancy);
 			TextView timeToGo = (TextView) rowView.findViewById(R.id.time_to_go);
+			TextView queue = (TextView) rowView.findViewById(R.id.queue);
 			int viewId = curZone.getId();
+			//DATA
 			rowView.setTag(R.string.subzone_tag_key, "subZone");
 			final ImageView subZonePic = (ImageView) rowView.findViewById(R.id.pics);
 
@@ -63,6 +70,7 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 			description.setText(curZone.getDescription());
 			occupancy.setText(curZone.getOccupancy()+"%");
 			timeToGo.setText(curZone.getTimeToGo());
+			queue.setText(curZone.getQueue());
 			// TAG ID ZONE
 			rowView.setTag(R.string.id_tag_key, viewId);
 			// TAG URL PIC
@@ -97,6 +105,10 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 	public int getCount()
 	{
 		return zones.size();
+	}
+
+	public void setFinalSearch(boolean isFinalSearch){
+		this.isFinalSearch= isFinalSearch; 
 	}
 
 	private void setColorTitle(TextView title, int occupancy, int thresholdMin, int thresholdMax){
@@ -140,54 +152,60 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults results = new FilterResults();
-			if (constraint == null || constraint.length() == 0) {
-				// No filter implemented we return all the list
-				results.values = savedZones;
-				results.count = savedZones.size();
-			}
-			else{
-				// VARS
-				ArrayList<Zone> zoneRes = new ArrayList<Zone>();
-				boolean addSubZone = false;
-				boolean zoneAdded = false;
-				int indexZoneSaved = -1;
-				// MATCHING ZONE
-				for(int i=0;i<savedZones.size();i++){
-					// ZONE
-					if(!savedZones.get(i).isSubZone()){
-						Zone curZone = savedZones.get(i);
-						addSubZone = false;
-						zoneAdded = false;
-						if(curZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
-							zoneRes.add(curZone);
-							addSubZone = true;
+			if(!isFinalSearch){
+				if (constraint == null || constraint.length() == 0) {
+					// No filter implemented we return all the list
+					results.values = savedZones;
+					results.count = savedZones.size();
+				}
+				else{
+					// VARS
+					ArrayList<Zone> zoneRes = new ArrayList<Zone>();
+					boolean addSubZone = false;
+					boolean zoneAdded = false;
+					int indexZoneSaved = -1;
+					// MATCHING ZONE
+					for(int i=0;i<savedZones.size();i++){
+						// ZONE
+						if(!savedZones.get(i).isSubZone()){
+							Zone curZone = savedZones.get(i);
+							addSubZone = false;
+							zoneAdded = false;
+							if(curZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
+								zoneRes.add(curZone);
+								addSubZone = true;
+							}
+							else{
+								indexZoneSaved = i;
+							}
 						}
+						// SUB ZONE
 						else{
-							indexZoneSaved = i;
-						}
-					}
-					// SUB ZONE
-					else{
-						Zone curSubZone = savedZones.get(i);
-						if(addSubZone){
-							zoneRes.add(curSubZone);
-						}
-						else{
-							if(curSubZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
-								if(zoneAdded){
-									zoneRes.add(curSubZone);
-								}
-								else{
-									zoneRes.add(savedZones.get(indexZoneSaved));
-									zoneRes.add(curSubZone);
-									zoneAdded = true;
+							Zone curSubZone = savedZones.get(i);
+							if(addSubZone){
+								zoneRes.add(curSubZone);
+							}
+							else{
+								if(curSubZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
+									if(zoneAdded){
+										zoneRes.add(curSubZone);
+									}
+									else{
+										zoneRes.add(savedZones.get(indexZoneSaved));
+										zoneRes.add(curSubZone);
+										zoneAdded = true;
+									}
 								}
 							}
 						}
 					}
+					results.values = zoneRes;
+					results.count = zoneRes.size();
 				}
-				results.values = zoneRes;
-				results.count = zoneRes.size();
+			}
+			else{
+				if(results.count == savedZones.size())
+					Toast.makeText(context, "No matching results", Toast.LENGTH_SHORT).show();
 			}
 			return results;
 		}

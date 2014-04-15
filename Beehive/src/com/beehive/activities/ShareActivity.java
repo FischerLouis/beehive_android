@@ -1,7 +1,5 @@
 package com.beehive.activities;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +14,9 @@ import com.beehive.tools.Constants;
 import com.beehive.tools.VolleySingleton;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -34,16 +34,15 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 
 	private int zoneId;
 	private String title;
-	private String subtitle;
 	private String occupancy;
 	private String timeToGo;
 	private Bitmap bm;
-	private TextView hourView;
-	private TextView minuteView;
-	private TextView ampmView;
+	private TextView totalContributionView;
+	private TextView rankView;
 	private RadioGroup radioGroup;
 	private int contribution = 0;
-	private Calendar calendar;
+	private int totalContribution = 0;
+	private SharedPreferences prefs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +52,6 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		Intent intent = getIntent();
 		zoneId = intent.getIntExtra("ID", 0);
 		title = intent.getStringExtra("TITLE");
-		subtitle = intent.getStringExtra("SUBTITLE");
 		occupancy = intent.getStringExtra("OCCUPANCY");
 		timeToGo = intent.getStringExtra("TIMETOGO");
 		String queue = intent.getStringExtra("QUEUE");
@@ -63,21 +61,18 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		bm = extras.getParcelable(Constants.KEY_PIC);
 		//Retrieve views
 		TextView titleView = (TextView)findViewById(R.id.title);
-		TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 		TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 		TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
 		TextView queueView = (TextView)findViewById(R.id.queue);
 		ImageView pic = (ImageView)findViewById(R.id.pics);
 		LinearLayout sendLayout = (LinearLayout)findViewById(R.id.footer_queue);
-		hourView = (TextView)findViewById(R.id.time_hour);
-		minuteView = (TextView)findViewById(R.id.time_minutes);
-		ampmView = (TextView)findViewById(R.id.time_ampm);
+		totalContributionView = (TextView)findViewById(R.id.total_contribution);
+		rankView = (TextView)findViewById(R.id.contribution_rank);
 		radioGroup = (RadioGroup) findViewById(R.id.radio_queue);
 		pic.setImageBitmap(bm);
 		//Setting up data
 		titleView.setText(title);
 		titleView.setTextColor(colorTitle);
-		subtitleView.setText(subtitle);
 		if(occupancy != null)
 			occupancyView.setText(occupancy);
 		if(timeToGo != null)
@@ -87,55 +82,51 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		//LISTENER
 		sendLayout.setOnTouchListener(this);
 		radioGroup.setOnCheckedChangeListener(this);
-		//INIT TIME
-		Date now = new Date();
-		calendar = Calendar.getInstance();
-		calendar.setTime(now);
+		//PREFERENCES
+		prefs = this.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
 		//SET TIME VIEW
-		setTime();
+		setContribution();
 	}
 
 	@Override
 	public void onBackPressed() {
-		setIntent();
 		finish();
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case android.R.id.home:
-			setIntent(); 
+		case android.R.id.home: 
 			finish();
 		}
 		return true;
 	}
 
-	private void setIntent(){
-		Intent intent = new Intent();
-		//PUT VALUES
-		intent.putExtra("ID", zoneId);
-		intent.putExtra("TITLE", title);
-		intent.putExtra("SUBTITLE", subtitle);
-		intent.putExtra("OCCUPANCY", occupancy);
-		intent.putExtra("TIMETOGO", timeToGo);
-		Bundle picExtra = new Bundle();
-		picExtra.putParcelable(Constants.KEY_PIC, bm);
-		intent.putExtras(picExtra);	
-	}
+	private void setContribution(){
+		//GET TOTAL CONTRIBUTION (if exist)
+		if(prefs.contains("totalContribution")){
+			totalContribution = prefs.getInt("totalContribution", 0);
+			totalContributionView.setText(""+totalContribution);
 
-	private void setTime(){
-		//GET TIME
-		int hour = calendar.get(Calendar.HOUR);
-		int minute = calendar.get(Calendar.MINUTE);
-		int ampm = calendar.get(Calendar.AM_PM);
-		//SET TIME
-		hourView.setText(""+hour);
-		minuteView.setText(""+minute);
-		if(ampm == 0)
-			ampmView.setText("AM");
-		else
-			ampmView.setText("PM");
+			if(totalContribution < Constants.RANK_2_THRESHOLD){
+				rankView.setText(Constants.RANK_1_LABEL);
+			}
+			else if(totalContribution < Constants.RANK_3_THRESHOLD){
+				rankView.setText(Constants.RANK_2_LABEL);
+			}
+			else if(totalContribution < Constants.RANK_4_THRESHOLD){
+				rankView.setText(Constants.RANK_3_LABEL);
+			}
+			else if(totalContribution < Constants.RANK_5_THRESHOLD){
+				rankView.setText(Constants.RANK_4_LABEL);
+			}
+			else{
+				rankView.setText(Constants.RANK_5_LABEL);
+			}
+		}
+		else{
+			prefs.edit().putInt("totalContribution", 0).commit();
+		}
 	}
 
 	@Override
@@ -143,8 +134,9 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		switch(v.getId()){
 		case R.id.footer_queue:
 			if(event.getAction() == MotionEvent.ACTION_UP){
+				prefs.edit().putInt("totalContribution", totalContribution+10).commit();
 				sendData();
-				Toast.makeText(this, "BeeHive thanks you! +1", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "BeeHive thanks you! +10", Toast.LENGTH_SHORT).show();
 				finish();
 			}
 			break;

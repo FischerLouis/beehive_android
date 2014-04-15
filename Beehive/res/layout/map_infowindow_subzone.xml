@@ -5,21 +5,37 @@
 
     <!-- /// BUILDING NAME /// -->
 
-    <ImageView
-        android:id="@+id/subzone_pic"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_centerVertical="true"
+    <LinearLayout
+        android:id="@+id/layout_pics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:layout_marginRight="2dp"
-        android:contentDescription="@string/image_description"
-        android:padding="1dp"
-        android:src="@drawable/ic_launcher" />
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/subzone_pic"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/image_description"
+            android:src="@drawable/ic_launcher" />
+
+        <TextView
+            android:id="@+id/subzone_occupancy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/string_default"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/subzone_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/subzone_pic"
+        android:layout_toRightOf="@+id/layout_pics"
         android:maxLines="1"
         android:text="@string/string_default"
         android:textColor="@color/black"
@@ -30,7 +46,7 @@
         android:layout_width="170dp"
         android:layout_height="1dp"
         android:layout_below="@+id/subzone_name"
-        android:layout_toRightOf="@+id/subzone_pic"
+        android:layout_toRightOf="@+id/layout_pics"
         android:background="@color/black" />
 
     <TextView
@@ -38,41 +54,12 @@
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/subzone_separator"
-        android:layout_toRightOf="@+id/subzone_pic"
+        android:layout_toRightOf="@+id/layout_pics"
+        android:textStyle="italic"
         android:maxLines="3"
         android:text="@string/string_default"
         android:textColor="@color/black"
         android:textSize="12sp" />
-
-    <!-- /// OCCUPANCY /// -->
-
-    <LinearLayout
-        android:id="@+id/occupancy_layout"
-        android:layout_width="170dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/subzone_description"
-        android:layout_toRightOf="@+id/subzone_pic"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/subzone_occupancy_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:text="@string/occupancy"
-            android:textColor="@color/black"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/subzone_occupancy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            android:maxLines="1"
-            android:text="@string/string_default"
-            android:textColor="@color/black"
-            android:textSize="14sp" />
-    </LinearLayout>
 
     <!-- /// BEST TIME TO GO /// -->
 
@@ -80,8 +67,8 @@
         android:id="@+id/timetogo_layout"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/occupancy_layout"
-        android:layout_toRightOf="@+id/subzone_pic"
+        android:layout_below="@+id/subzone_description"
+        android:layout_toRightOf="@+id/layout_pics"
         android:orientation="horizontal" >
 
         <!-- /// TIME TO GO /// -->
@@ -104,8 +91,7 @@
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>
-    
-    
+
     <!-- /// BEST TIME TO GO /// -->
 
     <LinearLayout
@@ -113,7 +99,7 @@
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/timetogo_layout"
-        android:layout_toRightOf="@+id/subzone_pic"
+        android:layout_toRightOf="@+id/layout_pics"
         android:orientation="horizontal" >
 
         <!-- /// QUEUE /// -->

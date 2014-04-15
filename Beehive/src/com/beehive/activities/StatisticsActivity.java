@@ -45,6 +45,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class StatisticsActivity extends Activity {
 
@@ -64,15 +65,13 @@ public class StatisticsActivity extends Activity {
 		Intent intent = getIntent();
 		zoneId = intent.getIntExtra("ID", 0);
 		String title = intent.getStringExtra("TITLE");
-		String subtitle = intent.getStringExtra("SUBTITLE");
-		int occupancy = intent.getIntExtra("OCCUPANCY", 0);
+		String occupancy = intent.getStringExtra("OCCUPANCY");
 		String timeToGo = intent.getStringExtra("TIMETOGO");
 		String queue = intent.getStringExtra("QUEUE");
 		int colorTitle = intent.getIntExtra("TITLECOLOR",R.color.black);
 		String urlPic = intent.getStringExtra("URLPIC");
 		// VIEWS
 		TextView titleView = (TextView)findViewById(R.id.title);
-		TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 		TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 		TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
 		TextView queueView = (TextView)findViewById(R.id.queue);
@@ -81,13 +80,11 @@ public class StatisticsActivity extends Activity {
 		//Setting up data
 		titleView.setText(title);
 		titleView.setTextColor(colorTitle);
-		subtitleView.setText(subtitle);
 		setImage(urlPic, pic);
-		occupancyView.setText(occupancy+"%");
+		occupancyView.setText(occupancy);
 		if(timeToGo != null)
 			timeToGoView.setText(timeToGo);
-		if(queue != null)
-			queueView.setText(queue);
+		queueView.setText(queue);
 	}
 
 	protected void onResume() {
@@ -113,7 +110,6 @@ public class StatisticsActivity extends Activity {
 			Intent intent = new Intent(this, ShareActivity.class);
 			// VIEW RETRIEVING
 			TextView titleView = (TextView)findViewById(R.id.title);
-			TextView subtitleView = (TextView)findViewById(R.id.subtitle);
 			TextView occupancyView = (TextView)findViewById(R.id.occupancy);
 			TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
 			TextView queueView = (TextView)findViewById(R.id.queue);
@@ -125,14 +121,12 @@ public class StatisticsActivity extends Activity {
 			picExtra.putParcelable(Constants.KEY_PIC, picBm);
 			//SET VAR			
 			String title = titleView.getText().toString();
-			String subtitle = subtitleView.getText().toString();
 			String occupancy = occupancyView.getText().toString();
 			String timeToGo = timeToGoView.getText().toString();
 			String queue = queueView.getText().toString();
 			//PUT VALUES
 			intent.putExtra("ID", zoneId);
 			intent.putExtra("TITLE", title);
-			intent.putExtra("SUBTITLE", subtitle);
 			intent.putExtra("OCCUPANCY", occupancy);
 			intent.putExtra("TIMETOGO", timeToGo);
 			intent.putExtra("QUEUE", queue);
@@ -180,6 +174,7 @@ public class StatisticsActivity extends Activity {
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
+				Toast.makeText(getApplicationContext(), "Request error ... Check your data connection and try again", Toast.LENGTH_SHORT).show();
 				VolleyLog.e("Error: ", error.getMessage());
 			}
 		});

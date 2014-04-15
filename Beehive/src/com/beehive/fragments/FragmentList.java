@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -139,13 +138,11 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			Intent intent = new Intent(getActivity(), StatisticsActivity.class);
 			// VIEW RETRIEVING
 			TextView titleView = (TextView)view.findViewById(R.id.title);
-			TextView subtitleView = (TextView)view.findViewById(R.id.subtitle);
 			TextView occupancyView = (TextView)view.findViewById(R.id.occupancy);
 			TextView timeToGoView = (TextView)view.findViewById(R.id.time_to_go);
 			TextView queueView = (TextView)view.findViewById(R.id.queue);
 			//SET VAR			
 			String title = titleView.getText().toString();
-			String subtitle = subtitleView.getText().toString();
 			String occupancy = occupancyView.getText().toString();
 			String timeToGo = timeToGoView.getText().toString();
 			String queue = queueView.getText().toString();
@@ -154,7 +151,6 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			//PUT VALUES
 			intent.putExtra("ID", idView);
 			intent.putExtra("TITLE", title);
-			intent.putExtra("SUBTITLE", subtitle);
 			intent.putExtra("OCCUPANCY", occupancy);
 			intent.putExtra("TIMETOGO", timeToGo);
 			intent.putExtra("QUEUE", queue);
@@ -181,53 +177,10 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 		}	
 	}
 	@Override
-	public void passQueryTextChange(String query) {
-		
+	public void passQueryText(String query, boolean isFinalSearch) {
+		if(isFinalSearch)
+			adapter.setFinalSearch(isFinalSearch);
 		adapter.getFilter().filter(query);
-		
-		/*
-		boolean addSubZone = false;
-		boolean zoneAdded = false;
-		Zone curZoneSaved = null;
-		//NEW RESULT
-		ArrayList<Zone> searchList = new ArrayList<Zone>();
-		//FINDING MATCHING ZONE
-		for(int i=0;i<zonesList.size();i++){
-			Log.v("XXXXXX",zonesList.get(i).getName());
-			// ZONE
-			if(!zonesList.get(i).isSubZone()){
-				Zone curZone = zonesList.get(i);
-				addSubZone = false;
-				zoneAdded = false;
-				if(curZone.getName().equals(query)){
-					searchList.add(curZone);
-					addSubZone = true;
-				}
-				else{
-					curZoneSaved = curZone;
-				}
-			}
-			// SUB ZONE
-			else{
-				Zone curSubZone = zonesList.get(i);
-				if(addSubZone){
-					searchList.add(curSubZone);
-				}
-				else{
-					if(curSubZone.getName().equals(query)){
-						if(zoneAdded){
-							searchList.add(curSubZone);
-						}
-						else{
-							searchList.add(curZoneSaved);
-							searchList.add(curSubZone);
-							zoneAdded = true;
-						}
-					}
-				}
-
-			}
-		}*/
 	}
 
 }

@@ -47,19 +47,6 @@
             android:textColor="@color/black"
             android:textSize="20sp" />
 
-        <!-- /// SUBTITLE /// -->
-
-        <TextView
-            android:id="@+id/subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/string_default"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:textStyle="italic" />
-
-        <!-- /// OCCUPANCY /// -->
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -80,14 +67,12 @@
                 android:id="@+id/time_to_go"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
                 android:maxLines="1"
+                android:layout_marginRight="10dp"
                 android:text="@string/string_default"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
-
-            <!-- /// QUEUE /// -->
-
+            
             <TextView
                 android:id="@+id/queue_label"
                 android:layout_width="wrap_content"
