@@ -66,6 +66,8 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	private HashMap<String,Integer> subZonesList;
 	private ArrayList<Marker> markersZoneList;
 	private ArrayList<Marker> markersSubZoneList;
+	
+	private boolean loaded = false;
 
 	public FragmentMap(){
 	}
@@ -112,7 +114,6 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			try {
 				updateStaticData(((MainActivity)context).jsonCached);
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			((MainActivity)context).loadMapFromCache = false;
@@ -122,6 +123,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	@Override
 	public void onStop(){
 		super.onStop();
+		if(loaded)
 		showMarkers(false, false);
 	}
 
@@ -140,6 +142,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	}
 
 	public void updateStaticData(JSONArray json) throws JSONException{
+		loaded = true;
 		//DATA
 		addInfoZoneHm = new HashMap<String,AddInfoZone>();
 		zonesList = new HashMap<String,Integer>();
@@ -356,12 +359,12 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 		mImageLoader.get(url, new ImageListener() {
 
 			public void onErrorResponse(VolleyError error) {
-				//TODO
+				Log.v("IMAGE LOADING","IMAGE LOAD ERROR");
 			}
 
 			public void onResponse(ImageContainer response, boolean arg1) {
 				if (response.getBitmap() != null) {
-					//TODO	                	
+					// IMAGE IS CACHED
 				}
 			}
 		});
@@ -374,8 +377,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			view.setImageBitmap(bitmap);
 		}
 		else
-			//TODO ImageView FAIL
-			Log.v("XX","FAIL");
+			Log.v("IMAGE LOADING","IMAGE LOAD FROM CACHE FAIL");
 	}
 
 	private void displaySearchedMarkers(String query){

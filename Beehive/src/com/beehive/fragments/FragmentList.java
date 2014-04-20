@@ -71,7 +71,6 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 			try {
 				updateStaticData(((MainActivity)context).jsonCached);
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			((MainActivity)context).loadListFromCache = false;
@@ -177,10 +176,7 @@ public class FragmentList extends ListFragment implements FragmentListCommunicat
 		}	
 	}
 	@Override
-	public void passQueryText(String query, boolean isFinalSearch) {
-		if(isFinalSearch)
-			adapter.setFinalSearch(isFinalSearch);
+	public void passQueryText(String query) {
 		adapter.getFilter().filter(query);
 	}
-
 }

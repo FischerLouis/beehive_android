@@ -19,25 +19,25 @@
     <string name="title_activity_share">Share</string>
     <string name="title_options">Options</string>
     <string name="search_hint">Where do you want to go ?</string>
-    <string name="no_items">No items to display yet</string>
+    <string name="no_items">No items to display</string>
     <string name="title_week">WEEKLY</string>
     <string name="title_day">DAILY</string>
     <string name="title_contribution">TOTAL CONTRIBUTION</string>
-    <string name="title_queue">QUEUE</string>
+    <string name="title_queue">LINE</string>
     <string name="contribution_default">0</string>
     <string name="contribution_pts_default">pts</string>
     <string name="contribution_rank_default">Larva Yellow Jacket</string>
     <string name="time_ampm_default">AM</string>
     <string name="queue1">Closed</string>
-    <string name="queue2">Short Queue</string>
-    <string name="queue3">Medium Queue</string>
-    <string name="queue4">Long Queue</string>
+    <string name="queue2">Short Line</string>
+    <string name="queue3">Medium Line</string>
+    <string name="queue4">Long Line</string>
     <string name="queue_question">How was the place today?</string>
     <string name="queue_footer">Send</string>
     <string name="occupancy">Occupancy: \u0020</string>
     <string name="time_to_go">Go: \u0020</string>
     <string name="string_default">N/A</string>
     <string name="image_description">TODO</string>
-    <string name="queue">Queue: \u0020</string>
+    <string name="queue">Line: \u0020</string>
 
 </resources>

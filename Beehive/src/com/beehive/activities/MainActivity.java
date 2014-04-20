@@ -10,7 +10,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.beehive.fragments.FragmentList;
 import com.beehive.fragments.FragmentMap;
 import com.beehive.tools.Constants;
@@ -35,7 +34,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
+import android.view.View;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.Toast;
@@ -59,7 +58,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	public JSONArray jsonCached;
 
 	private int curTabId = 0;
-	
+
 	private SearchView searchView;
 
 	TabListener tabListener = this;
@@ -69,10 +68,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		//INIT QUEUE
 		queue = VolleySingleton.getInstance().getRequestQueue();
-		
+
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -176,6 +175,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				@Override
 				public void onErrorResponse(VolleyError error) {
 					Toast.makeText(context, "Request error ... Check your data connection and try again", Toast.LENGTH_SHORT).show();
+					progress.dismiss();
 					VolleyLog.e("Error: ", error.getMessage());
 				}
 			});
@@ -212,12 +212,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		this.optionsMenu = menu;
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main_actions, menu);
-				
+
 		// Associate searchable configuration with the SearchView
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setOnQueryTextListener(this);
+		//searchView.setOnCloseListener(this);
+		
+		/* Override search underline color*/        
+		// Getting id for 'search_plate'
+        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
+        View searchPlate = searchView.findViewById(searchPlateId);           
+        searchPlate.setBackgroundResource(R.drawable.textfield_searchview_holo_light);
+		
 		return true;
 	}
 
@@ -289,8 +297,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 	@Override
 	public boolean onQueryTextSubmit(String textSearched) {
-		if(fragmentListCommunicator != null)
-			fragmentListCommunicator.passQueryText(textSearched, true);
 		searchView.clearFocus();
 		return true;
 	}
@@ -298,7 +304,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	@Override
 	public boolean onQueryTextChange(String newText) {
 		if(fragmentListCommunicator != null)
-			fragmentListCommunicator.passQueryText(newText, false);
+			fragmentListCommunicator.passQueryText(newText);
 		if(fragmentMapCommunicator != null)
 			fragmentMapCommunicator.passQueryTextChange(newText);
 		return false;

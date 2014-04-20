@@ -36,7 +36,7 @@
                 android:id="@+id/title_total_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:background="@color/orange"
+                android:background="@color/gray"
                 android:orientation="vertical" >
 
                 <TextView
@@ -63,6 +63,7 @@
                 android:id="@+id/layout_contribution"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="vertical" >
 
                 <RelativeLayout
@@ -115,7 +116,7 @@
                 android:id="@+id/queue_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:background="@color/orange"
+                android:background="@color/gray"
                 android:orientation="vertical" >
 
                 <TextView

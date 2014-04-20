@@ -18,9 +18,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:weightSum="2"
         android:layout_below="@+id/separator"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:weightSum="2" >
 
         <!-- LAYOUT WEEKLY -->
 
@@ -36,7 +36,7 @@
                 android:id="@+id/title_week_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:background="@color/orange"
+                android:background="@color/gray"
                 android:orientation="vertical" >
 
                 <TextView
@@ -56,6 +56,15 @@
                     android:layout_marginBottom="1dp"
                     android:background="@color/white" />
             </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/weekly_progress"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/average_week_chart"
@@ -78,7 +87,7 @@
                 android:id="@+id/title_day_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:background="@color/orange"
+                android:background="@color/gray"
                 android:orientation="vertical" >
 
                 <TextView
@@ -99,6 +108,15 @@
                     android:background="@color/white" />
             </RelativeLayout>
 
+            <ProgressBar
+                android:id="@+id/daily_progress"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
             <HorizontalScrollView
                 android:id="@+id/hsw"
                 android:layout_width="wrap_content"
@@ -114,43 +132,43 @@
 
                     <LinearLayout
                         android:id="@+id/mon_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/tue_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/wed_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/thu_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/fri_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/sat_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/sun_chart"
-                        android:layout_width="330dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal" />
                 </LinearLayout>

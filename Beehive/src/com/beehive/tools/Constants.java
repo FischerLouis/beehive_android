@@ -15,8 +15,6 @@ public class Constants {
 
 	public static final String KEY_PIC = "key_pic";
 
-	public static final int CHART_DISPLACEMENT = 655;
-
 	public static final float MAP_ZOOM_THRESHOLD = 17f;
 	public static final float MAP_ZOOM_INIT = 14.5f;
 

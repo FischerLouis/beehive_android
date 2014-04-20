@@ -36,14 +36,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +59,10 @@ public class StatisticsActivity extends Activity {
 	private int zoneId;
 	private GraphicalView weekChart;
 	private ImageLoader mImageLoader;
+	private ProgressBar weeklyLoading;
+	private ProgressBar dailyLoading;
+	private boolean showSpinners;
+	private int width = 600; // DEFAULT VALUE
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +85,12 @@ public class StatisticsActivity extends Activity {
 		TextView timeToGoView = (TextView)findViewById(R.id.time_to_go);
 		TextView queueView = (TextView)findViewById(R.id.queue);
 		ImageView pic = (ImageView)findViewById(R.id.pics);
+		weeklyLoading = (ProgressBar)findViewById(R.id.weekly_progress);
+		dailyLoading = (ProgressBar)findViewById(R.id.daily_progress);
 		hsv = (HorizontalScrollView) findViewById(R.id.hsw);
+		//SCREEN WIDTH
+		width = getScreenWidth();
+		hsv.setLayoutParams(new LinearLayout.LayoutParams(width*7, LayoutParams.WRAP_CONTENT));
 		//Setting up data
 		titleView.setText(title);
 		titleView.setTextColor(colorTitle);
@@ -85,14 +99,13 @@ public class StatisticsActivity extends Activity {
 		if(timeToGo != null)
 			timeToGoView.setText(timeToGo);
 		queueView.setText(queue);
+		showSpinners = true;
 	}
 
 	protected void onResume() {
 		super.onResume();
 		//REQUEST
 		requestChartData();
-		//
-		hsv.scrollTo(300, 0);
 	}
 
 	@Override
@@ -150,22 +163,33 @@ public class StatisticsActivity extends Activity {
 			Date now = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(now);
-			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)-2;
-			//curDay = dayOfWeek;
-			hsv.scrollTo(Constants.CHART_DISPLACEMENT*(dayOfWeek), 0);
+			final int  dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)-2;
+			hsv.scrollTo(width*(dayOfWeek), 0);
+			hsv.post(new Runnable() {
+				@Override
+				public void run() {
+					hsv.scrollTo(width*(dayOfWeek), 0);
+				} 
+			});
 		}
 	}
 
 	private void requestChartData(){
 		// Init Requests Queue
 		queue = Volley.newRequestQueue(this);
-
 		String urlChartData = Constants.URL_DYNAMIC_DAILY+zoneId;
+		if(showSpinners){
+			weeklyLoading.setVisibility(View.VISIBLE);
+			dailyLoading.setVisibility(View.VISIBLE);
+		}
 
 		JsonArrayRequest chartDataReq = new JsonArrayRequest(urlChartData, new Response.Listener<JSONArray>(){
 			@Override
 			public void onResponse(JSONArray response) {
 				try {
+					weeklyLoading.setVisibility(View.GONE);
+					dailyLoading.setVisibility(View.GONE);
+					showSpinners = false;
 					buildCharts(response);
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -196,6 +220,7 @@ public class StatisticsActivity extends Activity {
 			XYSeries curSerie=new XYSeries("Daily Occupancy Serie");
 			JSONObject day = json.getJSONObject(i);
 			LinearLayout curLayout = getLayoutFromId(i);
+			curLayout.setLayoutParams(new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT));
 			JSONArray hours = day.getJSONArray("hours");
 			int dayAverage = 0;
 			int maxDay = 0;
@@ -240,6 +265,13 @@ public class StatisticsActivity extends Activity {
 		//weekChart.setOnClickListener(this);
 		LinearLayout weekLayout = (LinearLayout) findViewById(R.id.average_week_chart);
 		weekLayout.addView(weekChart);	
+	}
+
+	private int getScreenWidth(){
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		return size.x;
 	}
 
 	private LinearLayout getLayoutFromId(int id){

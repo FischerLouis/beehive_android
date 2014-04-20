@@ -21,16 +21,14 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 
 	private final Context context;
 	private ArrayList<Zone> zones;
-	private ArrayList<Zone> savedZones;
+	private final ArrayList<Zone> savedZones;
 	private ImageLoader mImageLoader;
 	private ZoneFilter zoneFilter;
-	private boolean isFinalSearch = false;
 
 	public ZonesListAdapter(Context context,int resourceId, ArrayList<Zone> zones) {
 		super(context, resourceId, zones);
@@ -107,10 +105,6 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		return zones.size();
 	}
 
-	public void setFinalSearch(boolean isFinalSearch){
-		this.isFinalSearch= isFinalSearch; 
-	}
-
 	private void setColorTitle(TextView title, int occupancy, int thresholdMin, int thresholdMax){
 		if(occupancy < thresholdMin){
 			title.setTextColor(context.getResources().getColor(R.color.green));
@@ -152,60 +146,56 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults results = new FilterResults();
-			if(!isFinalSearch){
-				if (constraint == null || constraint.length() == 0) {
-					// No filter implemented we return all the list
-					results.values = savedZones;
-					results.count = savedZones.size();
-				}
-				else{
-					// VARS
-					ArrayList<Zone> zoneRes = new ArrayList<Zone>();
-					boolean addSubZone = false;
-					boolean zoneAdded = false;
-					int indexZoneSaved = -1;
-					// MATCHING ZONE
-					for(int i=0;i<savedZones.size();i++){
-						// ZONE
-						if(!savedZones.get(i).isSubZone()){
-							Zone curZone = savedZones.get(i);
-							addSubZone = false;
-							zoneAdded = false;
-							if(curZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
-								zoneRes.add(curZone);
-								addSubZone = true;
-							}
-							else{
-								indexZoneSaved = i;
-							}
+			if (constraint == null || constraint.length() == 0) {
+				// No filter implemented we return all the list
+				ArrayList<Zone> zoneRes = new ArrayList<Zone>();
+				zoneRes.addAll(savedZones);
+				results.values = zoneRes;
+				results.count = savedZones.size();
+			}
+			else{
+				// VARS
+				ArrayList<Zone> zoneRes = new ArrayList<Zone>();
+				boolean addSubZone = false;
+				boolean zoneAdded = false;
+				int indexZoneSaved = -1;
+				// MATCHING ZONE
+				for(int i=0;i<savedZones.size();i++){
+					// ZONE
+					if(!savedZones.get(i).isSubZone()){
+						Zone curZone = savedZones.get(i);
+						addSubZone = false;
+						zoneAdded = false;
+						if(curZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
+							zoneRes.add(curZone);
+							addSubZone = true;
 						}
-						// SUB ZONE
 						else{
-							Zone curSubZone = savedZones.get(i);
-							if(addSubZone){
-								zoneRes.add(curSubZone);
-							}
-							else{
-								if(curSubZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
-									if(zoneAdded){
-										zoneRes.add(curSubZone);
-									}
-									else{
-										zoneRes.add(savedZones.get(indexZoneSaved));
-										zoneRes.add(curSubZone);
-										zoneAdded = true;
-									}
+							indexZoneSaved = i;
+						}
+					}
+					// SUB ZONE
+					else{
+						Zone curSubZone = savedZones.get(i);
+						if(addSubZone){
+							zoneRes.add(curSubZone);
+						}
+						else{
+							if(curSubZone.getName().toUpperCase().contains(constraint.toString().toUpperCase())){
+								if(zoneAdded){
+									zoneRes.add(curSubZone);
+								}
+								else{
+									zoneRes.add(savedZones.get(indexZoneSaved));
+									zoneRes.add(curSubZone);
+									zoneAdded = true;
 								}
 							}
 						}
 					}
-					results.values = zoneRes;
-					results.count = zoneRes.size();
 				}
-			}
-			else{
-				if(results.count == savedZones.size())
-					Toast.makeText(context, "No matching results", Toast.LENGTH_SHORT).show();
+				results.values = zoneRes;
+				results.count = zoneRes.size();
 			}
 			return results;
 		}
@@ -213,8 +203,12 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected void publishResults(CharSequence constraint,FilterResults results) {
-			if (results.count == 0)
-				notifyDataSetInvalidated();
+			if (results.count == 0){
+				Log.v("ZONES",zones.toString());
+				Log.v("ZONES SAVED",savedZones.toString());
+				zones.removeAll(zones);
+				notifyDataSetChanged();
+			}
 			else {
 				zones = (ArrayList<Zone>) results.values;
 				notifyDataSetChanged();
