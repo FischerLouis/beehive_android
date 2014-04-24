@@ -10,8 +10,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.beehive.R;
+import com.beehive.application.BeehiveApplication;
 import com.beehive.tools.Constants;
 import com.beehive.tools.VolleySingleton;
+import com.google.android.gms.analytics.GoogleAnalytics;
 
 import android.app.Activity;
 import android.content.Context;
@@ -48,6 +50,8 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_share);
+		//Get a Tracker (should auto-report)
+		((BeehiveApplication) getApplication()).getTracker(BeehiveApplication.TrackerName.APP_TRACKER);
 		// DATA FROM INTENT
 		Intent intent = getIntent();
 		zoneId = intent.getIntExtra("ID", 0);
@@ -86,6 +90,20 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 		prefs = this.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
 		//SET TIME VIEW
 		setContribution();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		//Get an Analytics tracker to report app starts & uncaught exceptions etc.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		//Stop the analytics tracking
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
 	}
 
 	@Override

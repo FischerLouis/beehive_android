@@ -12,7 +12,6 @@ import com.beehive.objects.Zone;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,7 +65,10 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 
 			title.setText(curZone.getName());
 			description.setText(curZone.getDescription());
-			occupancy.setText(curZone.getOccupancy()+"%");
+			if (curZone.getOccupancy() == -1)
+				occupancy.setText(context.getResources().getString(R.string.string_default));
+			else
+				occupancy.setText(curZone.getOccupancy()+"%");
 			timeToGo.setText(curZone.getTimeToGo());
 			queue.setText(curZone.getQueue());
 			// TAG ID ZONE
@@ -204,8 +206,6 @@ public class ZonesListAdapter extends ArrayAdapter<Zone> implements Filterable {
 		@Override
 		protected void publishResults(CharSequence constraint,FilterResults results) {
 			if (results.count == 0){
-				Log.v("ZONES",zones.toString());
-				Log.v("ZONES SAVED",savedZones.toString());
 				zones.removeAll(zones);
 				notifyDataSetChanged();
 			}

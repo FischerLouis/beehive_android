@@ -34,6 +34,8 @@
     	<item name="android:listChoiceBackgroundIndicator">@drawable/beehivestyle_list_selector_holo_light</item>
     	<item name="android:activatedBackgroundIndicator">@drawable/beehivestyle_activated_background_holo_light</item>
     	<item name="android:fastScrollThumbDrawable">@drawable/beehivestyle_fastscroll_thumb_holo</item>
+    	
+    	<item name="android:fastScrollThumbDrawable">@drawable/beehivestyle_fastscroll_thumb_holo</item>
         
                 <!-- Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.Beehivestyle.Widget</item>

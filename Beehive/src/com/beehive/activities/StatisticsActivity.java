@@ -27,8 +27,10 @@ import com.android.volley.toolbox.Volley;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.beehive.R;
+import com.beehive.application.BeehiveApplication;
 import com.beehive.tools.Constants;
 import com.beehive.tools.VolleySingleton;
+import com.google.android.gms.analytics.GoogleAnalytics;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -39,7 +41,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -68,6 +69,8 @@ public class StatisticsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_statistics);
+		//Get a Tracker (should auto-report)
+		((BeehiveApplication) getApplication()).getTracker(BeehiveApplication.TrackerName.APP_TRACKER);
 		//SET IMAGE LOADER
 		mImageLoader = VolleySingleton.getInstance().getImageLoader();
 		//DATA FROM INTENT
@@ -90,7 +93,6 @@ public class StatisticsActivity extends Activity {
 		hsv = (HorizontalScrollView) findViewById(R.id.hsw);
 		//SCREEN WIDTH
 		width = getScreenWidth();
-		hsv.setLayoutParams(new LinearLayout.LayoutParams(width*7, LayoutParams.WRAP_CONTENT));
 		//Setting up data
 		titleView.setText(title);
 		titleView.setTextColor(colorTitle);
@@ -106,6 +108,20 @@ public class StatisticsActivity extends Activity {
 		super.onResume();
 		//REQUEST
 		requestChartData();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		//Get an Analytics tracker to report app starts & uncaught exceptions etc.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		//Stop the analytics tracking
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
 	}
 
 	@Override
@@ -155,24 +171,14 @@ public class StatisticsActivity extends Activity {
 		}
 		return true;
 	}
-
+	/*
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if(hasFocus){
-			Date now = new Date();
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(now);
-			final int  dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)-2;
-			hsv.scrollTo(width*(dayOfWeek), 0);
-			hsv.post(new Runnable() {
-				@Override
-				public void run() {
-					hsv.scrollTo(width*(dayOfWeek), 0);
-				} 
-			});
+
 		}
-	}
+	}*/
 
 	private void requestChartData(){
 		// Init Requests Queue
@@ -265,6 +271,31 @@ public class StatisticsActivity extends Activity {
 		//weekChart.setOnClickListener(this);
 		LinearLayout weekLayout = (LinearLayout) findViewById(R.id.average_week_chart);
 		weekLayout.addView(weekChart);	
+		//SET FOCUS
+		setChartFocus();
+	}
+
+	private void setChartFocus(){
+		Date now = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		final int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+		if(dayOfWeek == 1){
+			hsv.post(new Runnable() {
+				@Override
+				public void run () {
+					hsv.scrollTo(width*(6), 0);
+				}
+			});
+		}
+		else{
+			hsv.post(new Runnable() {
+				@Override
+				public void run () {
+					hsv.scrollTo(width*(dayOfWeek-2), 0);
+				}
+			});
+		}
 	}
 
 	private int getScreenWidth(){

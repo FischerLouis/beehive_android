@@ -10,6 +10,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.beehive.application.BeehiveApplication;
 import com.beehive.fragments.FragmentList;
 import com.beehive.fragments.FragmentMap;
 import com.beehive.tools.Constants;
@@ -17,6 +18,7 @@ import com.beehive.tools.FragmentListCommunicator;
 import com.beehive.tools.FragmentMapCommunicator;
 import com.beehive.tools.VolleySingleton;
 import com.beehive.R;
+import com.google.android.gms.analytics.GoogleAnalytics;
 
 import android.app.ActionBar;
 import android.app.ActionBar.TabListener;
@@ -36,10 +38,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
+import android.widget.SearchView.OnCloseListener;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener, OnQueryTextListener {
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener, OnQueryTextListener, OnCloseListener {
 
 	private Menu optionsMenu;
 	private RequestQueue queue;
@@ -68,6 +71,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		//Get a Tracker (should auto-report)
+		((BeehiveApplication) getApplication()).getTracker(BeehiveApplication.TrackerName.APP_TRACKER);
 
 		//INIT QUEUE
 		queue = VolleySingleton.getInstance().getRequestQueue();
@@ -99,6 +105,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	}
 
 	@Override
+	public void onStart() {
+		super.onStart();
+		//Get an Analytics tracker to report app starts & uncaught exceptions etc.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		//Stop the analytics tracking
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+	}
+
+	@Override
 	public void onPause() {
 		super.onPause();  // Always call the superclass method first
 		prefs.edit().putInt("curTabId", curTabId).commit();
@@ -114,9 +134,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		if(prefs.contains("curTabId")){
 			viewPager.setCurrentItem(prefs.getInt("curTabId", 0));
 		}
-		// Init Requests Queue
-		// queue = Volley.newRequestQueue(this);
-		// REQUESTS DATA (STATIC & REALTIME)
 		dataRequest();
 	}
 
@@ -174,7 +191,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}, new Response.ErrorListener() {
 				@Override
 				public void onErrorResponse(VolleyError error) {
-					Toast.makeText(context, "Request error ... Check your data connection and try again", Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, getResources().getString(R.string.req_error), Toast.LENGTH_SHORT).show();
 					progress.dismiss();
 					VolleyLog.e("Error: ", error.getMessage());
 				}
@@ -200,7 +217,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
-				Toast.makeText(context, "Request error ... Check your data connection and try again", Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, getResources().getString(R.string.req_error), Toast.LENGTH_SHORT).show();
 				VolleyLog.e("Error: ", error.getMessage());
 			}
 		});
@@ -218,14 +235,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setOnQueryTextListener(this);
-		//searchView.setOnCloseListener(this);
-		
+		searchView.setOnCloseListener(this);
+
 		/* Override search underline color*/        
 		// Getting id for 'search_plate'
-        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
-        View searchPlate = searchView.findViewById(searchPlateId);           
-        searchPlate.setBackgroundResource(R.drawable.textfield_searchview_holo_light);
-		
+		int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
+		View searchPlate = searchView.findViewById(searchPlateId);           
+		searchPlate.setBackgroundResource(R.drawable.textfield_searchview_holo_light);
+
 		return true;
 	}
 
@@ -307,6 +324,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			fragmentListCommunicator.passQueryText(newText);
 		if(fragmentMapCommunicator != null)
 			fragmentMapCommunicator.passQueryTextChange(newText);
+		return false;
+	}
+
+	@Override
+	public boolean onClose() {
+		if(fragmentListCommunicator != null)
+			fragmentMapCommunicator.endSearch();
 		return false;
 	}
 }

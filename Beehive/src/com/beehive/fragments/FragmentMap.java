@@ -66,8 +66,9 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	private HashMap<String,Integer> subZonesList;
 	private ArrayList<Marker> markersZoneList;
 	private ArrayList<Marker> markersSubZoneList;
-	
+
 	private boolean loaded = false;
+	private boolean onSearch = false;
 
 	public FragmentMap(){
 	}
@@ -124,7 +125,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	public void onStop(){
 		super.onStop();
 		if(loaded)
-		showMarkers(false, false);
+			showMarkers(false, false);
 	}
 
 	private void initMap(){
@@ -251,7 +252,10 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			intent.putExtra("TITLE", markerTitle);
 			intent.putExtra("URLPIC", addInfoZoneHm.get(markerTitle).getUrlPic());
 			if(realTimeInfoZoneHm != null){
-				intent.putExtra("OCCUPANCY",realTimeInfoZoneHm.get(id).getOccupancy()+"%");
+				if (realTimeInfoZoneHm.get(id).getOccupancy() == -1)
+					intent.putExtra("OCCUPANCY",context.getResources().getString(R.string.string_default));
+				else
+					intent.putExtra("OCCUPANCY",realTimeInfoZoneHm.get(id).getOccupancy()+"%");
 				intent.putExtra("TIMETOGO",realTimeInfoZoneHm.get(id).getBestTime());
 				intent.putExtra("QUEUE",realTimeInfoZoneHm.get(id).getQueue());
 				intent.putExtra("TITLECOLOR",getColorTitle(realTimeInfoZoneHm.get(id).getOccupancy(), realTimeInfoZoneHm.get(id).getThresholdMin(), realTimeInfoZoneHm.get(id).getThresholdMax()));
@@ -291,10 +295,13 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			subZoneDescription.setText(info.getDescription());
 			// SET FROM CACHE
 			setImageFromCache(info.getUrlPic(), subZonePic);
-			// REAL TIME INFO
+			// REAL TIME INFO	
 			if(realTimeInfoZoneHm != null){
 				RealTimeInfoZone realTimeInfo = realTimeInfoZoneHm.get(info.getId());
-				subZoneOccupancy.setText(realTimeInfo.getOccupancy()+"%");
+				if (realTimeInfo.getOccupancy() == -1)
+					subZoneOccupancy.setText(context.getResources().getString(R.string.string_default));
+				else
+					subZoneOccupancy.setText(realTimeInfo.getOccupancy()+"%");
 				subZoneTimeToGo.setText(realTimeInfo.getBestTime());
 				subZoneQueue.setText(realTimeInfo.getQueue());
 				setColorTitle(subZoneName, realTimeInfo.getOccupancy(), realTimeInfo.getThresholdMin(), realTimeInfo.getThresholdMax());
@@ -334,14 +341,15 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 
 	@Override
 	public void onCameraChange(CameraPosition position) {
-		if(previousZoomLevel != position.zoom)
-		{
-			if(position.zoom >= Constants.MAP_ZOOM_THRESHOLD){
-				showMarkers(false, true);
+		if(!onSearch){
+			if(previousZoomLevel != position.zoom){
+				if(position.zoom >= Constants.MAP_ZOOM_THRESHOLD){
+					showMarkers(false, true);
+				}
+				else {
+					showMarkers(true, false);
+				}          
 			}
-			else {
-				showMarkers(true, false);
-			}          
 		}
 		previousZoomLevel = position.zoom;		
 	}
@@ -414,6 +422,11 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 	}
 	@Override
 	public void passQueryTextChange(String query) {
+		onSearch = true;
 		displaySearchedMarkers(query);
+	}
+	@Override
+	public void endSearch() {
+		onSearch = false;
 	}
 }
