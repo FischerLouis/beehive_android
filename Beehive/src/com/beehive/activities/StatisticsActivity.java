@@ -41,6 +41,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,6 +59,7 @@ public class StatisticsActivity extends Activity {
 	private HorizontalScrollView hsv;
 	private RequestQueue queue;
 	private int zoneId;
+	private int dayOfWeek;
 	private GraphicalView weekChart;
 	private ImageLoader mImageLoader;
 	private ProgressBar weeklyLoading;
@@ -102,6 +104,8 @@ public class StatisticsActivity extends Activity {
 			timeToGoView.setText(timeToGo);
 		queueView.setText(queue);
 		showSpinners = true;
+		//CALENDAR
+		dayOfWeek = getDay();
 	}
 
 	protected void onResume() {
@@ -171,14 +175,24 @@ public class StatisticsActivity extends Activity {
 		}
 		return true;
 	}
-	/*
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-		if(hasFocus){
 
-		}
-	}*/
+	private int getDay(){
+		Date now = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		int day = calendar.get(Calendar.DAY_OF_WEEK);
+		if (day == 1)
+			return 6;
+		else
+			return (day-2); // (JSON LOOP AND WEEK OFFSET)
+	}
+	
+	private int getHour(){
+		Date now = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		return calendar.get(Calendar.HOUR_OF_DAY);
+	}
 
 	private void requestChartData(){
 		// Init Requests Queue
@@ -214,7 +228,8 @@ public class StatisticsActivity extends Activity {
 	private void buildCharts(JSONArray json) throws JSONException{
 		//INIT WEEK DATA
 		XYMultipleSeriesDataset weekDataSet = new XYMultipleSeriesDataset();
-		CategorySeries weekSeries = new CategorySeries("Average occupancy");
+		CategorySeries weekSerieOff = new CategorySeries("Average occupancy");
+		CategorySeries weekSerieOn = new CategorySeries("Average occupancy");
 		int maxWeek = 0;
 		// INIT X VALUES
 		int X[] = new int[96];
@@ -224,6 +239,8 @@ public class StatisticsActivity extends Activity {
 		// DAY CHARTS
 		for(int i=0;i<json.length();i++){
 			XYSeries curSerie=new XYSeries("Daily Occupancy Serie");
+			XYSeries pointerSerie=new XYSeries("");
+			XYSeries dotSerie=new XYSeries("");
 			JSONObject day = json.getJSONObject(i);
 			LinearLayout curLayout = getLayoutFromId(i);
 			curLayout.setLayoutParams(new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT));
@@ -232,6 +249,8 @@ public class StatisticsActivity extends Activity {
 			int maxDay = 0;
 			int minDay = 0;
 			int nbSamples = hours.length();
+			int pointedClientCount = 0;
+			int pointedHour = 0;
 			if(nbSamples == 0){
 				for(int l=0;l<95;l++){
 					int curClientCount = 0;
@@ -243,6 +262,14 @@ public class StatisticsActivity extends Activity {
 				for(int j=0;j<nbSamples;j++){
 					int curClientCount = hours.getJSONObject(j).getInt("clients");
 					curSerie.add(X[j], curClientCount);
+					//CROSS LINE CHARTS
+					if(i == dayOfWeek){
+						if(j == (getHour()*4)){
+							pointedClientCount = curClientCount;
+							pointedHour = j;
+						}
+					}
+					// STATS
 					if(curClientCount > maxDay)
 						maxDay = curClientCount;
 					else if(curClientCount < minDay)
@@ -251,23 +278,39 @@ public class StatisticsActivity extends Activity {
 				}
 				dayAverage = dayAverage/nbSamples;
 			}
-			//INIT LINE CHART
+			//DOT CHART
+			dotSerie.add(pointedHour, pointedClientCount);
+			//POINTER CHART
+			for(int k=0;k<=pointedClientCount;k++){
+				pointerSerie.add(pointedHour, k);
+			}
+			// LINE CHARTS RENDERER
 			XYMultipleSeriesRenderer curLineRendere = getLineRenderer();
 			lineChartSettings(curLineRendere, day.getString("day"), nbSamples, minDay, maxDay);
 			//SET DAY CHART
-			weekSeries.add(dayAverage);
+			if(i == dayOfWeek){
+				weekSerieOff.add(0);
+				weekSerieOn.add(dayOfWeek);
+			}
+			else{
+				weekSerieOff.add(dayAverage);
+				weekSerieOn.add(0);
+			}
 			if(maxWeek < dayAverage)
 				maxWeek = dayAverage;
 			XYMultipleSeriesDataset curDataSet = new XYMultipleSeriesDataset();
 			curDataSet.addSeries(curSerie);
+			curDataSet.addSeries(pointerSerie);
+			curDataSet.addSeries(dotSerie);
 			GraphicalView curChart = ChartFactory.getLineChartView(this, curDataSet, curLineRendere);
 			curLayout.addView(curChart);
 		}
-		weekDataSet.addSeries(weekSeries.toXYSeries());
+		weekDataSet.addSeries(weekSerieOff.toXYSeries());
+		weekDataSet.addSeries(weekSerieOn.toXYSeries());
 		// WEEK CHART
 		XYMultipleSeriesRenderer barRenderer = getBarRenderer();
 		barChartSettings(barRenderer, maxWeek);
-		weekChart = ChartFactory.getBarChartView(this, weekDataSet, barRenderer, Type.DEFAULT);
+		weekChart = ChartFactory.getBarChartView(this, weekDataSet, barRenderer, Type.STACKED);
 		//weekChart.setOnClickListener(this);
 		LinearLayout weekLayout = (LinearLayout) findViewById(R.id.average_week_chart);
 		weekLayout.addView(weekChart);	
@@ -276,26 +319,13 @@ public class StatisticsActivity extends Activity {
 	}
 
 	private void setChartFocus(){
-		Date now = new Date();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(now);
-		final int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		if(dayOfWeek == 1){
-			hsv.post(new Runnable() {
-				@Override
-				public void run () {
-					hsv.scrollTo(width*(6), 0);
-				}
-			});
-		}
-		else{
-			hsv.post(new Runnable() {
-				@Override
-				public void run () {
-					hsv.scrollTo(width*(dayOfWeek-2), 0);
-				}
-			});
-		}
+		final int dayOfWeekRunnable = getDay();
+		hsv.post(new Runnable() {
+			@Override
+			public void run () {
+				hsv.scrollTo(width*(dayOfWeekRunnable), 0);
+			}
+		});
 	}
 
 	private int getScreenWidth(){
@@ -327,22 +357,43 @@ public class StatisticsActivity extends Activity {
 
 	private XYMultipleSeriesRenderer getBarRenderer() {
 		XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
-		SimpleSeriesRenderer r = new SimpleSeriesRenderer();
-		r.setColor(getResources().getColor(R.color.orange));
-		renderer.addSeriesRenderer(r);
+		
+		SimpleSeriesRenderer r1 = new SimpleSeriesRenderer();
+		r1.setColor(getResources().getColor(R.color.gray));
+		renderer.addSeriesRenderer(r1);
+		
+		SimpleSeriesRenderer r2 = new SimpleSeriesRenderer();
+		r2.setColor(getResources().getColor(R.color.orange));
+		renderer.addSeriesRenderer(r2);
+		
 		renderer.setClickEnabled(true);
-		//renderer.setSelectableBuffer(10);
 		return renderer;
 	}
-
+	
 	private XYMultipleSeriesRenderer getLineRenderer() {
 		XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
-		XYSeriesRenderer  r = new XYSeriesRenderer ();
-		r.setPointStyle(PointStyle.DIAMOND);
-		r.setColor(getResources().getColor(R.color.orange));
-		r.setFillPoints(true);
-		r.setLineWidth(2);
-		renderer.addSeriesRenderer(r);
+		
+		XYSeriesRenderer  r1 = new XYSeriesRenderer ();
+		r1.setPointStyle(PointStyle.POINT);
+		r1.setColor(getResources().getColor(R.color.gray));
+		r1.setFillPoints(true);
+		r1.setLineWidth(2);
+		renderer.addSeriesRenderer(r1);
+		
+		XYSeriesRenderer  r2 = new XYSeriesRenderer ();
+		r2.setPointStyle(PointStyle.POINT);
+		r2.setColor(getResources().getColor(R.color.orange));
+		r2.setFillPoints(true);
+		r2.setLineWidth(3);
+		renderer.addSeriesRenderer(r2);
+		
+		XYSeriesRenderer  r3 = new XYSeriesRenderer ();
+		r3.setPointStyle(PointStyle.CIRCLE);
+		r3.setColor(getResources().getColor(R.color.orange));
+		r3.setFillPoints(false);
+		r3.setPointStrokeWidth(5);
+		renderer.addSeriesRenderer(r3);
+		
 		return renderer;
 	}
 	// BAR CHART SETTINGS
@@ -368,7 +419,10 @@ public class StatisticsActivity extends Activity {
 		renderer.setXAxisMax(7.5);
 		renderer.setYAxisMin(0);
 		formatYTextLabel(renderer, maxWeek);
-		renderer.setYAxisMax(maxWeek);
+		if(maxWeek<100)
+			renderer.setYAxisMax(100);
+		else
+			renderer.setYAxisMax(maxWeek);
 		// TEXT LABEL X AND Y
 		renderer.setChartTitle("Average occupancy");
 		renderer.addXTextLabel(1, "Mon.");
@@ -409,7 +463,10 @@ public class StatisticsActivity extends Activity {
 		renderer.setXAxisMin(0);
 		renderer.setXAxisMax(nbSamples);
 		renderer.setYAxisMin(minDay);
-		renderer.setYAxisMax(maxDay);
+		if(maxDay<100)
+			renderer.setYAxisMax(100);
+		else
+			renderer.setYAxisMax(maxDay);
 		// TEXT
 		renderer.setChartTitle(day);
 		formatXTextLabel(renderer);
@@ -449,7 +506,6 @@ public class StatisticsActivity extends Activity {
 				renderer.addXTextLabel(i, "9pm");
 				break;
 			default:
-				renderer.addXTextLabel(i, "");
 				break;
 			}
 		}
@@ -457,26 +513,19 @@ public class StatisticsActivity extends Activity {
 
 	private void formatYTextLabel(XYMultipleSeriesRenderer renderer, int maxWeek){
 		renderer.setYLabels(0);
-		int threshold1 = maxWeek/4;
-		int threshold2 = maxWeek/2;
-		int threshold3 = (maxWeek/4)*3;
-		int threshold4 = maxWeek;
-		for(int i=0; i<=maxWeek;i++){
-			if(i == threshold1){
-				renderer.addYTextLabel(i, threshold1+"%", 0);
-			}
-			else if(i == threshold2){
-				renderer.addYTextLabel(i, threshold2+"%", 0);
-			}
-			else if(i == threshold3){
-				renderer.addYTextLabel(i, threshold3+"%", 0);
-			}
-			else if(i == threshold4){
-				renderer.addYTextLabel(i, threshold4+"%", 0);
-			}
-			else{
-				renderer.addYTextLabel(i, "", 0);
-			}
+		if(maxWeek <= 100){
+			for(int i=0; i<=100;i++){
+				if(i%25 == 0){
+					renderer.addYTextLabel(i, i+"%", 0);
+				}
+			}			
+		}
+		else if(maxWeek > 100){
+			for(int i=0; i<=maxWeek;i++){
+				if(i%50 == 0){
+					renderer.addYTextLabel(i, i+"%", 0);
+				}
+			}				
 		}
 	}
 

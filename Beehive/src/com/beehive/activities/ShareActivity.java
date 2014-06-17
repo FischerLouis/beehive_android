@@ -154,7 +154,7 @@ public class ShareActivity extends Activity implements OnTouchListener, OnChecke
 			if(event.getAction() == MotionEvent.ACTION_UP){
 				prefs.edit().putInt("totalContribution", totalContribution+10).commit();
 				sendData();
-				Toast.makeText(this, "BeeHive thanks you! +10", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "BeeHive thanks you! +10pts", Toast.LENGTH_SHORT).show();
 				finish();
 			}
 			break;

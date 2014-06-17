@@ -22,7 +22,7 @@
     <string name="no_items">No items to display</string>
     <string name="title_week">WEEKLY</string>
     <string name="title_day">DAILY</string>
-    <string name="title_contribution">TOTAL CONTRIBUTION</string>
+    <string name="title_contribution">YOUR CONTRIBUTION</string>
     <string name="title_queue">LINE</string>
     <string name="contribution_default">0</string>
     <string name="contribution_pts_default">pts</string>
@@ -40,4 +40,6 @@
     <string name="image_description">TODO</string>
     <string name="queue">Line: \u0020</string>
     <string name="req_error">Check your data connection and try again</string>
+    <string name="credit_version">Version 1.1 © BeeHive</string>
+    <string name="credit_website">www.letsbeehive.com</string>
 </resources>

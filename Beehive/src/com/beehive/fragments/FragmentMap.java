@@ -168,8 +168,7 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			MarkerOptions curZoneMarkerOptions = new MarkerOptions()
 			.position(new LatLng(curZoneLatitude, curZoneLontitude))
 			.title(curZoneName)
-			.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_orange));
-			//.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+			.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_gray));
 			//marker
 			Marker currentZoneMarker = googleMap.addMarker(curZoneMarkerOptions);
 			markersZoneList.add(currentZoneMarker);
@@ -233,6 +232,16 @@ public class FragmentMap extends Fragment implements FragmentMapCommunicator, On
 			JSONObject curObj = json.getJSONObject(i);
 			RealTimeInfoZone curRealTimeInfoZone = new RealTimeInfoZone(curObj.getInt("id"), curObj.getInt("occupancy_percent"), curObj.getString("best_time"), curObj.getString("queue"), curObj.getInt("threshold_min"), curObj.getInt("threshold_max"));
 			realTimeInfoZoneHm.put(curObj.getInt("id"), curRealTimeInfoZone);
+		}
+		//COLORED
+		// COLORED SUBZONE PINS
+		for(int j = 0;j<markersSubZoneList.size();j++){
+			Marker curMarker = markersSubZoneList.get(j);
+			RealTimeInfoZone curRealTimeInfo = realTimeInfoZoneHm.get(subZonesList.get(curMarker.getTitle()));
+			if(curRealTimeInfo.getOccupancy() <= curRealTimeInfo.getThresholdMin())
+				curMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_green));
+			else if (curRealTimeInfo.getOccupancy() > curRealTimeInfo.getThresholdMax())
+				curMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_red));
 		}
 	}
 

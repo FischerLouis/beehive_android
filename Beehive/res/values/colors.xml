@@ -17,4 +17,5 @@
  <color name="navy">#000080</color>
  <color name="black">#000000</color>
  <color name="orange">#f7941e</color>
+ <color name="orange_light">#f5c995</color>
 </resources>

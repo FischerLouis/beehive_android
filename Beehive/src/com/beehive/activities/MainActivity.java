@@ -55,7 +55,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	public FragmentMapCommunicator fragmentMapCommunicator;
 	public FragmentListCommunicator fragmentListCommunicator;
 
-	// on Activity
 	public boolean loadMapFromCache = false;
 	public boolean loadListFromCache = false;
 	public JSONArray jsonCached;
@@ -64,8 +63,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 	private SearchView searchView;
 
-	TabListener tabListener = this;
-	Context context = this;
+	private TabListener tabListener = this;
+	private Context context = this;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +109,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		//Get an Analytics tracker to report app starts & uncaught exceptions etc.
 		GoogleAnalytics.getInstance(this).reportActivityStart(this);
 	}
-	
+
 	@Override
 	public void onStop() {
 		super.onStop();

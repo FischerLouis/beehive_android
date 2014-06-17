@@ -9,10 +9,7 @@ import com.android.volley.toolbox.Volley;
 import com.beehive.application.BeehiveApplication;
  
 public class VolleySingleton {
-	
-	//int memClass = ( ( ActivityManager )context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
-	//int cacheSize = 1024 * 1024 * memClass / 8;
-	
+		
     private static VolleySingleton mInstance = null;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
